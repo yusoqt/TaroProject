@@ -5,17 +5,341 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tarot Predictor</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'cinzel': ['Cinzel', 'serif'],
+            'cormorant': ['Cormorant Garamond', 'serif']
+          },
+          colors: {
+            'mystic-purple': '#4A266A',
+            'deep-purple': '#2D1441',
+            'midnight-blue': '#0F172A',
+            'gold': '#D4AF37',
+            'light-gold': '#F1E5AC'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Card animation styles */
+    .card-container {
+      perspective: 1000px;
+    }
+
+    .card {
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+    }
+
+    .card-back, .card-front {
+      backface-visibility: hidden;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .card-back {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      border: 2px solid rgba(212, 175, 55, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.75rem;
+      z-index: 2;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" stroke="rgba(212, 175, 55, 0.2)" stroke-width="2" fill="none"/><circle cx="50" cy="50" r="25" stroke="rgba(212, 175, 55, 0.2)" stroke-width="2" fill="none"/><path d="M50 10 L50 90 M10 50 L90 50" stroke="rgba(212, 175, 55, 0.2)" stroke-width="1"/></svg>');
+      background-size: 80px 80px;
+      background-position: center;
+      background-repeat: no-repeat;
+      box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.3);
+    }
+
+    .card-front {
+      transform: rotateY(180deg);
+      z-index: 1;
+      background: rgba(15, 23, 42, 0.8);
+      border: 2px solid rgba(212, 175, 55, 0.4);
+      border-radius: 0.75rem;
+      box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.2);
+    }
+
+    .card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    /* Ensure the Challenge card's front is properly displayed when flipped */
+    .challenge-card .card-front {
+      transform: rotateY(180deg) rotate(90deg);
+    }
+
+    .card-enter {
+      opacity: 0;
+      transform: translateY(20px) scale(0.8);
+    }
+
+    .card-enter-active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      transition: opacity 500ms, transform 500ms;
+    }
+
+    /* Card hover effect */
+    .card-container:hover {
+      transform: translateY(-5px) scale(1.02);
+      transition: transform 0.3s ease;
+    }
+
+    /* Apply rotation only to the card element, not to the tooltip */
+    .card-container[data-rotation] .card {
+      transform: rotate(var(--rotation));
+    }
+
+    /* Special handling for the Challenge card */
+    .challenge-card .card {
+      transform: rotate(90deg);
+    }
+
+    /* When the Challenge card is flipped, maintain the rotation */
+    .challenge-card .card.flipped {
+      transform: rotateY(180deg) rotate(90deg);
+    }
+
+    /* Fix for Challenge card when flipped */
+    .challenge-card.flipped .card {
+      transform: rotateY(180deg) rotate(90deg);
+    }
+
+    /* Keep position label upright */
+    .card-container[data-rotation] .position-label {
+      transform: rotate(0deg);
+    }
+
+    /* Tarot spread positions */
+    .tarot-position {
+      position: absolute;
+      width: 160px;
+      height: 240px;
+      transition: all 0.5s ease;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      border-radius: 0.75rem;
+    }
+
+    .position-label {
+      position: absolute;
+      background: linear-gradient(135deg, #4A266A, #2D1441);
+      color: #F1E5AC;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-family: 'Cinzel', serif;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      z-index: 10;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+    }
+
+    /* Add a subtle glow effect to the cards */
+    .card-container::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      right: -8px;
+      bottom: -8px;
+      border-radius: 0.9rem;
+      background: linear-gradient(45deg, #D4AF37, #6366f1, #8b5cf6, #D4AF37);
+      background-size: 400% 400%;
+      z-index: -1;
+      filter: blur(12px);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      animation: glowing 3s ease-in-out infinite;
+    }
+
+    .card-container.flipped::before {
+      opacity: 0.7;
+    }
+
+    @keyframes glowing {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Card meaning tooltip */
+    .card-tooltip {
+      position: absolute;
+      background: rgba(15, 23, 42, 0.98);
+      border: 1px solid rgba(212, 175, 55, 0.7);
+      border-radius: 0.5rem;
+      padding: 12px;
+      width: 240px;
+      max-height: 220px;
+      overflow-y: auto;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7), 0 0 15px rgba(212, 175, 55, 0.2);
+      z-index: 1000; /* Much higher z-index to ensure it's above all cards */
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.4s, transform 0.4s, z-index 0s;
+      transition-delay: 0.1s; /* Small delay before showing tooltip */
+      pointer-events: none;
+      font-family: 'Cormorant Garamond', serif;
+      color: #F1E5AC;
+      /* Ensure tooltip is never rotated, even if the card is */
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+      /* Ensure tooltip text is always readable */
+      text-orientation: upright;
+      writing-mode: horizontal-tb !important;
+    }
+
+    /* Ensure the Challenge card tooltip is properly positioned */
+    .challenge-card .card-tooltip {
+      transform: translateY(0) rotate(0deg) !important;
+    }
+
+    .card-container:hover {
+      z-index: 2000 !important; /* Ensure hovered card is above all others */
+    }
+
+    .card-container:hover .card-tooltip {
+      opacity: 1;
+      transform: translateY(0) rotate(0deg) !important; /* Force no rotation */
+      z-index: 2001; /* Even higher than the hovered card */
+    }
+
+    /* Ensure tooltips are always readable */
+    .card-tooltip h3, .card-tooltip p {
+      transform: rotate(0deg) !important;
+      text-align: left;
+    }
+
+    /* Special handling for tooltips of rotated cards */
+    .tooltip-for-rotated-card {
+      transform: rotate(0deg) !important; /* Always keep tooltip upright */
+      transform-origin: center center;
+    }
+
+    /* Adjust tooltip position for the Challenge card (card #2) */
+    .challenge-tooltip {
+      left: -180px !important; /* Move tooltip away from the rotated card */
+      top: 0 !important;
+      z-index: 2001 !important; /* Ensure it's above other elements */
+    }
+
+    /* Ensure the Challenge card's tooltip is always visible and properly positioned */
+    .challenge-card:hover .card-tooltip {
+      opacity: 1;
+      transform: translateY(0) rotate(0deg) !important;
+      z-index: 2001 !important;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(1deg); }
+      100% { transform: translateY(0px) rotate(0deg); }
+    }
+
+    .floating {
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .deck {
+      position: relative;
+      width: 120px;
+      height: 180px;
+      margin: 0 auto 2rem;
+      cursor: pointer;
+    }
+
+    .deck-card {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #4A266A, #2D1441);
+      border: 2px solid rgba(212, 175, 55, 0.4);
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" stroke="rgba(212, 175, 55, 0.2)" stroke-width="2" fill="none"/><circle cx="50" cy="50" r="25" stroke="rgba(212, 175, 55, 0.2)" stroke-width="2" fill="none"/><path d="M50 10 L50 90 M10 50 L90 50" stroke="rgba(212, 175, 55, 0.2)" stroke-width="1"/></svg>');
+      background-size: 80px 80px;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    /* Mystical background elements */
+    .mystical-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      opacity: 0.4;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 4s infinite;
+    }
+
+    @keyframes twinkle {
+      0% { opacity: 0.2; }
+      50% { opacity: 1; }
+      100% { opacity: 0.2; }
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-purple-900 to-black text-white min-h-screen flex flex-col items-center justify-center p-6">
+<body class="bg-gradient-to-br from-deep-purple via-midnight-blue to-black text-white min-h-screen flex flex-col items-center justify-center p-6 font-cormorant">
 
-  <h1 class="text-4xl font-bold mb-6">🔮 10-Card Tarot Reading 🔮</h1>
+  <!-- Mystical background with stars -->
+  <div class="mystical-bg" id="starsContainer"></div>
 
-  <button id="drawTenBtn" class="bg-indigo-600 hover:bg-indigo-700 px-6 py-3 rounded-lg text-lg font-semibold mb-6">
-    Draw 10 Cards
+  <h1 class="text-5xl font-cinzel font-bold mb-8 text-center text-light-gold tracking-wide">✧ Mystical Tarot Reading ✧</h1>
+
+  <div id="deckContainer" class="deck floating mb-6">
+    <!-- Deck cards will be added here by JavaScript -->
+  </div>
+
+  <button id="drawTenBtn" class="bg-gradient-to-r from-mystic-purple to-deep-purple hover:from-deep-purple hover:to-mystic-purple px-8 py-4 rounded-lg text-xl font-cinzel font-semibold mb-8 text-light-gold border border-gold/30 shadow-lg transition-all duration-300 hover:shadow-gold/20">
+    Reveal Your Destiny
   </button>
 
-  <div id="tenCardDisplay" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl"></div>
+  <div class="text-center mb-6">
+    <h2 class="text-3xl font-cinzel font-semibold mb-3 text-light-gold">Celtic Cross Spread</h2>
+    <p class="text-lg text-purple-200 max-w-2xl mx-auto leading-relaxed">The Celtic Cross is a classic 10-card tarot spread that provides insight into your past, present, and future. The first 6 cards form the cross, while the last 4 cards on the right form the staff, drawn from bottom to top (positions 7-10).</p>
+  </div>
 
+  <div id="tenCardDisplay" class="relative w-full max-w-5xl h-[800px] mx-auto">
+    <!-- Cards will be positioned absolutely within this container -->
+    <!-- Add a visual indicator for the staff drawing direction -->
+    <div class="absolute right-[70%] top-[66%] w-[30px] h-[200px] pointer-events-none opacity-40">
+      <div class="absolute w-full h-full flex flex-col items-center">
+        <div class="w-[2px] h-[180px] bg-gold/50"></div>
+        <div class="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[12px] border-b-gold/50 transform rotate-180"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="card-flip.js"></script>
   <script src="script.js"></script>
 </body>
 
