@@ -1,0 +1,897 @@
+/**
+ * Tarot Card Reading Application Styles
+ * A mystical tarot card reading experience with Celtic Cross spread
+ */
+
+/* CSS Variables for consistent theming */
+:root {
+  --mystic-purple: #4A266A;
+  --deep-purple: #2D1441;
+  --midnight-blue: #0F172A;
+  --gold: #D4AF37;
+  --light-gold: #F1E5AC;
+  --card-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  --gold-glow: 0 0 15px rgba(212, 175, 55, 0.3);
+
+  /* Animation durations for consistency */
+  --transition-fast: 0.2s;
+  --transition-medium: 0.3s;
+  --transition-slow: 0.5s;
+  --transition-card-flip: 0.8s;
+}
+
+/**
+ * Base Styles
+ */
+body {
+  background: linear-gradient(to bottom right, var(--deep-purple), var(--midnight-blue), #000);
+  color: white;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  font-family: 'Cormorant Garamond', serif;
+  overflow-x: hidden;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cinzel', serif;
+  color: var(--light-gold);
+}
+
+/* Main title styling */
+.main-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: var(--light-gold);
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive title size */
+@media (min-width: 768px) {
+  .main-title {
+    font-size: 3rem;
+  }
+}
+
+/**
+ * Button Styles
+ */
+.primary-button {
+  background: linear-gradient(to right, var(--mystic-purple), var(--deep-purple));
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  font-size: 1.25rem;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  color: var(--light-gold);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all var(--transition-medium) ease;
+  cursor: pointer;
+}
+
+/* Button hover state */
+.primary-button:hover {
+  background: linear-gradient(to right, var(--deep-purple), var(--mystic-purple));
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 0 10px rgba(212, 175, 55, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Button disabled state */
+.primary-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/**
+ * Card Animation and Display Styles
+ */
+
+/* Card container with 3D perspective */
+.card-container {
+  perspective: 1000px;
+  position: absolute;
+  width: 150px;
+  height: 250px;
+  transition: transform var(--transition-medium) ease;
+  margin: 0 10px; /* Add horizontal margin for better spacing */
+}
+
+/* Responsive card sizing */
+@media (min-width: 768px) {
+  .card-container {
+    width: 180px;
+    height: 300px;
+  }
+}
+
+/* Tarot spread positions */
+.tarot-position {
+  position: absolute;
+  transition: all var(--transition-slow) ease;
+  box-shadow: var(--card-shadow);
+  border-radius: 0.75rem;
+}
+
+/* Card element with 3D transform */
+.card {
+  transition: transform var(--transition-card-flip);
+  transform-style: preserve-3d;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Common styles for card front and back */
+.card-back, .card-front {
+  backface-visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.75rem;
+  border: 2px solid rgba(212, 175, 55, 0.6); /* เพิ่มความเข้มของขอบให้เห็นชัดขึ้น */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* เพิ่มเงาให้การ์ดดูมีมิติมากขึ้น */
+}
+
+/* Card back design */
+.card-back {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  z-index: 2;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" stroke="rgba(212, 175, 55, 0.2)" stroke-width="2" fill="none"/><circle cx="50" cy="50" r="25" stroke="rgba(212, 175, 55, 0.2)" stroke-width="2" fill="none"/><path d="M50 10 L50 90 M10 50 L90 50" stroke="rgba(212, 175, 55, 0.2)" stroke-width="1"/></svg>');
+  background-size: 80px 80px;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+/* Card front design */
+.card-front {
+  transform: rotateY(180deg);
+  z-index: 1;
+  background: rgba(15, 23, 42, 0.85); /* เพิ่มความทึบของพื้นหลังเล็กน้อย */
+  box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.3); /* เพิ่มแสงสีทองด้านใน */
+  padding: 0.5rem;
+  flex-direction: column;
+  text-align: center;
+  overflow: hidden;
+  border: 2px solid rgba(212, 175, 55, 0.7); /* เพิ่มความชัดเจนของขอบ */
+}
+
+/* Flipped card state */
+.card.flipped {
+  transform: rotateY(180deg);
+}
+
+/**
+ * Card Animation and Special Card Handling
+ */
+
+/* Challenge card front display when flipped */
+.challenge-card .card-front {
+  transform: rotateY(180deg) rotate(90deg) !important;
+  z-index: 2; /* Ensure front is visible when flipped */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--gold); /* Make the border more visible */
+  backface-visibility: visible !important; /* Ensure the front is visible when flipped */
+}
+
+/* Card entrance animation */
+.card-enter {
+  opacity: 0;
+  transform: translateY(20px) scale(0.8);
+}
+
+.card-enter-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity var(--transition-slow), transform var(--transition-slow);
+}
+
+/* Card hover effects */
+.card-container:hover {
+  transform: translateY(-5px) scale(1.03); /* เพิ่มขนาดเล็กน้อยเมื่อโฮเวอร์ */
+  transition: transform var(--transition-medium) ease, box-shadow var(--transition-medium) ease;
+  z-index: 2000 !important; /* Ensure hovered card is above all others */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(212, 175, 55, 0.5); /* เพิ่มเงาและแสงสีทองเมื่อโฮเวอร์ */
+}
+
+/* Special hover effect for challenge card */
+.challenge-card:hover {
+  transform: translateY(-5px) scale(1.03) !important;
+  z-index: 2000 !important;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(212, 175, 55, 0.5) !important; /* ใช้เงาแบบเดียวกับการ์ดปกติ */
+}
+
+/* Card hover effect with offset */
+.card-container[data-offset-y]:hover {
+  transform: translateY(calc(-5px + var(--offset-y, 0))) scale(1.02);
+}
+
+/* Card rotation handling */
+.card-container[data-rotation] .card {
+  transform: rotate(var(--rotation));
+}
+
+/* Challenge card specific styles */
+.challenge-card {
+  transform-origin: center center;
+  transform-style: preserve-3d;
+  z-index: 11 !important; /* Ensure it's above the first card */
+}
+
+.challenge-card .card {
+  transform: rotate(90deg);
+  opacity: 0.95;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  border: 2px solid var(--gold);
+}
+
+/* Single definition for challenge card when flipped */
+.challenge-card .card.flipped {
+  transform: rotateY(180deg) rotate(90deg) !important;
+  opacity: 1;
+  z-index: 12; /* Ensure it's above the first card */
+  backface-visibility: visible !important; /* Ensure the card is visible when flipped */
+}
+
+/* Keep position label upright regardless of card rotation */
+.card-container[data-rotation] .position-label {
+  transform: rotate(0deg);
+}
+
+/**
+ * Card Labels and Visual Enhancements
+ */
+
+/* Position label for each card */
+.position-label {
+  position: absolute;
+  bottom: -45px; /* Increased distance from card bottom for better spacing */
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 1rem; /* Slightly increased font size for better readability */
+  color: var(--light-gold);
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  z-index: 20; /* Increased z-index to ensure labels are visible */
+  background: rgba(15, 23, 42, 0.95);
+  padding: 6px 12px; /* Slightly increased padding for better appearance */
+  border-radius: 6px;
+  width: fit-content;
+  margin: 0 auto;
+  border: 1px solid rgba(212, 175, 55, 0.7);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  transition: all var(--transition-medium) ease;
+}
+
+/* Click indicator for interactive cards */
+.click-indicator {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--light-gold);
+  font-size: 0.8rem;
+  opacity: 0;
+  transition: opacity var(--transition-medium) ease, transform var(--transition-medium) ease;
+  z-index: 10;
+}
+
+/* Show click indicator on hover */
+.card-container:hover .click-indicator {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Mystical glow effect for cards */
+.card-container::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+  border-radius: 0.9rem;
+  background: linear-gradient(45deg, var(--gold), #6366f1, #8b5cf6, var(--gold));
+  background-size: 400% 400%;
+  z-index: -1;
+  filter: blur(12px);
+  opacity: 0;
+  transition: opacity var(--transition-medium) ease;
+  animation: glowing 3s ease-in-out infinite;
+}
+
+/* Show glow effect when card is flipped */
+.card-container.flipped::before {
+  opacity: 0.7;
+}
+
+/* Enhanced styling for flipped cards */
+.card-container.flipped {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4), 0 0 12px rgba(212, 175, 55, 0.4); /* เพิ่มเงาและแสงสีทองเมื่อพลิกแล้ว */
+}
+
+/* Glow animation */
+@keyframes glowing {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/**
+ * Deck Visualization Styles
+ */
+
+/* Deck container */
+.deck {
+  position: relative;
+  width: 150px;
+  height: 250px;
+  margin-bottom: 1.5rem;
+  transition: transform var(--transition-medium) ease;
+}
+
+/* Responsive deck sizing */
+@media (min-width: 768px) {
+  .deck {
+    width: 180px;
+    height: 300px;
+  }
+}
+
+/* Individual deck cards */
+.deck-card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--mystic-purple), var(--deep-purple));
+  border: 2px solid rgba(212, 175, 55, 0.4);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transition: transform var(--transition-medium) ease;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" stroke="rgba(212, 175, 55, 0.2)" stroke-width="2" fill="none"/><circle cx="50" cy="50" r="25" stroke="rgba(212, 175, 55, 0.2)" stroke-width="2" fill="none"/><path d="M50 10 L50 90 M10 50 L90 50" stroke="rgba(212, 175, 55, 0.2)" stroke-width="1"/></svg>');
+  background-size: 80px 80px;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Floating animation for deck elements */
+.floating {
+  animation: floating 3s ease-in-out infinite;
+}
+
+@keyframes floating {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Pulse animation for active elements */
+.animate-pulse {
+  animation: pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .7; }
+}
+
+/**
+ * Background and UI Elements
+ */
+
+/* Mystical starry background */
+.mystical-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.4;
+}
+
+/* Individual star elements */
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 4s ease-in-out infinite;
+  will-change: opacity; /* Optimize animation performance */
+  contain: layout style; /* Further optimize rendering */
+}
+
+/* Star twinkling animation - optimized for performance */
+@keyframes twinkle {
+  0% { opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
+/* Sound toggle button */
+.sound-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background: linear-gradient(to right, var(--mystic-purple), var(--deep-purple));
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--light-gold);
+  font-size: 1.25rem;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  transition: all var(--transition-medium) ease;
+  cursor: pointer;
+}
+
+/* Sound toggle hover effect */
+.sound-toggle:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 0 10px rgba(212, 175, 55, 0.2);
+  transform: translateY(-2px);
+}
+
+/**
+ * Reading Layout and Card Detail Panel
+ */
+
+/* Main reading container */
+.reading-container {
+  display: flex;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Card display area */
+.ten-card-display {
+  position: relative;
+  width: 100%;
+  max-width: 1200px; /* Further increased width to accommodate wider card spacing */
+  height: 1400px; /* Significantly increased height to accommodate more vertical spacing between cards */
+  margin: 0 auto;
+  flex: 1;
+}
+
+/* Card detail side panel */
+.card-detail-panel {
+  width: 300px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid var(--gold);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-left: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), var(--gold-glow);
+  display: flex;
+  flex-direction: column;
+  max-height: 800px;
+  overflow-y: auto;
+  transition: all var(--transition-medium) ease;
+}
+
+/* Panel header with title and close button */
+.card-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.detail-card-name {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+/* Close button for detail panel */
+.close-detail-btn {
+  background: transparent;
+  border: none;
+  color: var(--light-gold);
+  cursor: pointer;
+  font-size: 1.25rem;
+  padding: 0.25rem;
+  transition: all var(--transition-fast) ease;
+}
+
+.close-detail-btn:hover {
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Card image container in detail panel */
+.card-detail-image-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+/* Card image in detail panel */
+.detail-card-image {
+  max-width: 200px;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 0.5rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transition: transform var(--transition-medium) ease;
+}
+
+/* Reversed card in detail panel */
+.detail-card-image.reversed {
+  transform: rotate(180deg);
+}
+
+/* Card detail content area */
+.card-detail-content {
+  flex: 1;
+}
+
+/* Detail section for card meanings */
+.detail-section {
+  margin-bottom: 1rem;
+}
+
+/* Section titles in detail panel */
+.detail-section-title {
+  font-size: 1rem;
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+  font-family: 'Cinzel', serif;
+}
+
+/**
+ * Detail Text Styling
+ */
+.detail-text {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #e9d5ff;
+}
+
+/**
+ * Responsive Layout Adjustments
+ */
+@media (max-width: 1024px) {
+  /* Stack reading container on tablets */
+  .reading-container {
+    flex-direction: column;
+  }
+
+  /* Adjust detail panel for tablets */
+  .card-detail-panel {
+    width: 100%;
+    max-width: 900px;
+    margin-left: 0;
+    margin-top: 1rem;
+    max-height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Adjust display area for smaller screens */
+  .ten-card-display {
+    height: 1000px; /* Further increased height for better vertical spacing on tablets */
+  }
+
+  /* Scale down cards for smaller screens */
+  .card-container {
+    transform: scale(0.8); /* Smaller scale to accommodate increased spacing */
+  }
+
+  /* Adjust position label for better visibility on tablets */
+  .position-label {
+    font-size: 0.85rem;
+    padding: 3px 6px;
+    bottom: -30px; /* Move labels closer to cards */
+  }
+}
+
+/**
+ * Theme Toggle Button
+ */
+.theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 5rem;
+  background: linear-gradient(to right, var(--mystic-purple), var(--deep-purple));
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--light-gold);
+  font-size: 1.25rem;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  transition: all var(--transition-medium) ease;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 0 10px rgba(212, 175, 55, 0.2);
+  transform: translateY(-2px);
+}
+
+/**
+ * Reset Button
+ */
+.reset-button {
+  background: linear-gradient(to right, var(--mystic-purple), var(--deep-purple));
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  color: var(--light-gold);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all var(--transition-medium) ease;
+  cursor: pointer;
+  margin-top: 1.5rem;
+}
+
+.reset-button:hover {
+  background: linear-gradient(to right, var(--deep-purple), var(--mystic-purple));
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 0 10px rgba(212, 175, 55, 0.2);
+  transform: translateY(-2px);
+}
+
+/**
+ * Loading Spinner
+ */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(212, 175, 55, 0.3);
+  border-radius: 50%;
+  border-top: 4px solid var(--gold);
+  animation: spin 1s linear infinite;
+  margin: 1rem auto;
+}
+
+/* Spinner rotation animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/**
+ * Light Theme Styles
+ */
+body.light-theme {
+  background: linear-gradient(to bottom right, #e9d5ff, #c4b5fd, #f5f5f5);
+  color: #333;
+}
+
+/* Typography in light theme */
+body.light-theme .main-title,
+body.light-theme h1,
+body.light-theme h2,
+body.light-theme h3,
+body.light-theme h4,
+body.light-theme h5,
+body.light-theme h6 {
+  color: #4A266A;
+}
+
+/* Buttons in light theme */
+body.light-theme .primary-button,
+body.light-theme .reset-button {
+  background: linear-gradient(to right, #a78bfa, #8b5cf6);
+  color: white;
+  border: 1px solid rgba(74, 38, 106, 0.3);
+}
+
+body.light-theme .primary-button:hover,
+body.light-theme .reset-button:hover {
+  background: linear-gradient(to right, #8b5cf6, #7c3aed);
+}
+
+/* Cards in light theme */
+body.light-theme .card-back {
+  background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+}
+
+body.light-theme .card-front {
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+}
+
+/* Labels and panels in light theme */
+body.light-theme .position-label {
+  color: #4A266A;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+body.light-theme .card-detail-panel {
+  background: rgba(255, 255, 255, 0.95);
+  color: #333;
+}
+
+body.light-theme .detail-section-title {
+  color: #4A266A;
+}
+
+body.light-theme .detail-text {
+  color: #333;
+}
+
+/**
+ * Responsive Adjustments
+ */
+@media (max-width: 640px) {
+  /* Smaller cards for mobile */
+  .card-container {
+    width: 110px;
+    height: 180px;
+    margin: 0 5px; /* Reduced margin for smaller screens */
+  }
+
+  /* Smaller deck for mobile */
+  .deck {
+    width: 110px;
+    height: 180px;
+  }
+
+  /* Adjust display area height */
+  .ten-card-display {
+    height: 1000px; /* Increased height for better vertical spacing on mobile */
+    max-width: 100%; /* Ensure it fits on mobile */
+    padding-bottom: 70px; /* Increased padding at the bottom for the labels */
+  }
+
+  /* Smaller title for mobile */
+  .main-title {
+    font-size: 2rem;
+  }
+
+  /* Adjust position label for mobile */
+  .position-label {
+    font-size: 0.85rem; /* Slightly increased for better readability */
+    bottom: -35px; /* Increased distance from card bottom */
+    padding: 4px 8px; /* Increased padding for better appearance */
+  }
+
+  /* Adjust card positions for mobile */
+  .challenge-card {
+    z-index: 20 !important; /* Ensure it's above all other cards on mobile */
+  }
+}
+
+/**
+ * Utility Classes
+ */
+.hidden {
+  display: none !important;
+}
+
+/**
+ * Card Content Styles
+ */
+
+/* Card title */
+.card-title {
+  font-size: 0.9rem;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: var(--light-gold);
+}
+
+/* Card image container */
+.card-image-container {
+  width: 100%;
+  height: 65%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+/* Full height variant for image container */
+.card-image-container.full-height {
+  height: 100%;
+  margin-bottom: 0;
+}
+
+/* Card image */
+.card-image {
+  width: auto;
+  height: auto;
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  border-radius: 0.25rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: transform var(--transition-medium) ease;
+}
+
+/* Reversed card image */
+.card-image.reversed {
+  transform: rotate(180deg);
+}
+
+/**
+ * Special Card Handling
+ */
+
+/* Challenge card image container */
+.challenge-card .card-image-container {
+  transform: rotate(0deg) !important; /* Counter-rotate the image container */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  overflow: visible !important; /* Ensure the image is not clipped */
+  position: relative; /* Ensure proper positioning */
+}
+
+/* Challenge card image */
+.challenge-card .card-image {
+  max-width: 80%; /* Slightly smaller to fit better in rotated container */
+  max-height: 80%;
+  transform-origin: center center; /* Ensure rotation happens from the center */
+  transform: rotate(90deg) !important; /* Rotate the image to be horizontal */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Add shadow to make image stand out */
+  display: block; /* Ensure the image is displayed as a block element */
+}
+
+/* Challenge card image when reversed */
+.challenge-card .card-image.reversed {
+  transform: rotate(270deg) !important; /* Rotate reversed image to maintain horizontal orientation */
+}
+
+/* Staff indicator for visual guidance */
+.staff-indicator {
+  position: absolute;
+  top: 15%;
+  left: 70%;
+  height: 60%;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+
