@@ -30,10 +30,11 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
+  justify-content: flex-start; /* Changed from center to flex-start for better control */
+  padding: 1.5rem 1.5rem 5rem 1.5rem; /* Increased bottom padding */
   font-family: 'Cormorant Garamond', serif;
   overflow-x: hidden;
+  margin: 0; /* Ensure no default margin */
 }
 
 /* Typography */
@@ -102,7 +103,9 @@ h1, h2, h3, h4, h5, h6 {
   width: 150px;
   height: 250px;
   transition: transform var(--transition-medium) ease;
-  margin: 0 10px; /* Add horizontal margin for better spacing */
+  margin: 10px; /* Add margin on all sides for better spacing */
+  /* Add a subtle shadow to create depth between cards */
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
 }
 
 /* Responsive card sizing */
@@ -110,6 +113,28 @@ h1, h2, h3, h4, h5, h6 {
   .card-container {
     width: 180px;
     height: 300px;
+    margin: 15px; /* Increased margin for larger screens */
+  }
+
+  /* Adjust challenge card dimensions for larger screens */
+  .challenge-card {
+    width: 300px; /* Use the height value of normal cards */
+    height: 180px; /* Use the width value of normal cards */
+  }
+}
+
+/* Even larger cards for very large screens */
+@media (min-width: 1440px) {
+  .card-container {
+    width: 200px;
+    height: 330px;
+    margin: 20px; /* Further increased margin for very large screens */
+  }
+
+  /* Adjust challenge card dimensions for very large screens */
+  .challenge-card {
+    width: 330px;
+    height: 200px;
   }
 }
 
@@ -181,13 +206,15 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Challenge card front display when flipped */
 .challenge-card .card-front {
-  transform: rotateY(180deg) rotate(90deg) !important;
+  transform: rotateY(180deg) !important;
   z-index: 2; /* Ensure front is visible when flipped */
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid var(--gold); /* Make the border more visible */
-  backface-visibility: visible !important; /* Ensure the front is visible when flipped */
+  backface-visibility: hidden; /* Keep consistent with other cards */
+  /* Add a subtle glow to highlight the challenge card */
+  box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.4);
 }
 
 /* Card entrance animation */
@@ -212,9 +239,10 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Special hover effect for challenge card */
 .challenge-card:hover {
-  transform: translateY(-5px) scale(1.03) !important;
+  /* Keep the 90deg rotation but add the hover effects */
+  transform: translateY(-5px) scale(1.03) rotate(90deg) !important;
   z-index: 2000 !important;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(212, 175, 55, 0.5) !important; /* ใช้เงาแบบเดียวกับการ์ดปกติ */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(212, 175, 55, 0.5) !important; /* Use the same shadow as normal cards */
 }
 
 /* Card hover effect with offset */
@@ -232,25 +260,34 @@ h1, h2, h3, h4, h5, h6 {
   transform-origin: center center;
   transform-style: preserve-3d;
   z-index: 11 !important; /* Ensure it's above the first card */
+  /* Swap width and height for horizontal orientation */
+  width: 250px; /* Use the height value of normal cards */
+  height: 150px; /* Use the width value of normal cards */
+  /* Apply consistent rotation to the container */
+  transform: rotate(90deg);
 }
 
 .challenge-card .card {
-  transform: rotate(90deg);
   opacity: 0.95;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
   border: 2px solid var(--gold);
+  /* Ensure card dimensions match the container */
+  width: 100%;
+  height: 100%;
+  /* Don't rotate the card itself, as the container is already rotated */
+  transform: rotate(0deg);
 }
 
 /* Single definition for challenge card when flipped */
 .challenge-card .card.flipped {
-  transform: rotateY(180deg) rotate(90deg) !important;
+  transform: rotateY(180deg) !important;
   opacity: 1;
   z-index: 12; /* Ensure it's above the first card */
-  backface-visibility: visible !important; /* Ensure the card is visible when flipped */
 }
 
 /* Keep position label upright regardless of card rotation */
-.card-container[data-rotation] .position-label {
+.card-container[data-rotation] .position-label,
+.challenge-card .position-label {
   transform: rotate(0deg);
 }
 
@@ -475,35 +512,45 @@ h1, h2, h3, h4, h5, h6 {
 .reading-container {
   display: flex;
   width: 100%;
-  max-width: 1400px;
+  max-width: 1600px; /* Increased max-width to accommodate the wider spacing */
   margin: 0 auto;
   position: relative;
+  justify-content: space-between; /* Better distribution of space */
+  align-items: flex-start; /* Align items to the top */
+  gap: 2rem; /* Add gap between elements */
 }
 
 /* Card display area */
 .ten-card-display {
   position: relative;
   width: 100%;
-  max-width: 1200px; /* Further increased width to accommodate wider card spacing */
-  height: 1400px; /* Significantly increased height to accommodate more vertical spacing between cards */
-  margin: 0 auto;
+  max-width: 1400px; /* Increased width to accommodate wider card spacing */
+  height: 1200px; /* Optimized height for better vertical spacing between cards */
+  margin: 0 auto 4rem auto; /* Added bottom margin for better spacing from button */
   flex: 1;
+  /* Add a subtle grid for better visual alignment */
+  background-image: linear-gradient(rgba(212, 175, 55, 0.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(212, 175, 55, 0.03) 1px, transparent 1px);
+  background-size: 5% 5%;
+  padding-bottom: 2rem; /* Added padding at the bottom for better spacing */
 }
 
 /* Card detail side panel */
 .card-detail-panel {
-  width: 300px;
-  background: rgba(15, 23, 42, 0.9);
+  width: 350px; /* Increased width for better readability */
+  background: rgba(15, 23, 42, 0.95); /* Slightly more opaque background */
   border: 1px solid var(--gold);
   border-radius: 0.75rem;
-  padding: 1rem;
-  margin-left: 1rem;
+  padding: 1.5rem; /* Increased padding inside the panel */
+  margin-left: 3rem; /* Significantly increased margin from cards */
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), var(--gold-glow);
   display: flex;
   flex-direction: column;
   max-height: 800px;
   overflow-y: auto;
   transition: all var(--transition-medium) ease;
+  position: relative; /* Added position relative for z-index */
+  z-index: 100; /* Ensure it's above cards */
 }
 
 /* Panel header with title and close button */
@@ -511,30 +558,45 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid rgba(212, 175, 55, 0.5);
+  background: linear-gradient(to right, rgba(74, 38, 106, 0.5), rgba(15, 23, 42, 0.3));
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .detail-card-name {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.5px;
+  color: var(--light-gold);
 }
 
 /* Close button for detail panel */
 .close-detail-btn {
-  background: transparent;
-  border: none;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 50%;
   color: var(--light-gold);
   cursor: pointer;
   font-size: 1.25rem;
-  padding: 0.25rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all var(--transition-fast) ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .close-detail-btn:hover {
   color: white;
   transform: scale(1.1);
+  background: rgba(74, 38, 106, 0.8);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
 }
 
 /* Card image container in detail panel */
@@ -542,17 +604,23 @@ h1, h2, h3, h4, h5, h6 {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.3), rgba(15, 23, 42, 0.6));
+  border-radius: 0.75rem;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
 }
 
 /* Card image in detail panel */
 .detail-card-image {
-  max-width: 200px;
-  max-height: 300px;
+  max-width: 220px;
+  max-height: 320px;
   object-fit: contain;
   border-radius: 0.5rem;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 10px rgba(212, 175, 55, 0.3);
   transition: transform var(--transition-medium) ease;
+  border: 2px solid rgba(212, 175, 55, 0.6);
 }
 
 /* Reversed card in detail panel */
@@ -563,58 +631,74 @@ h1, h2, h3, h4, h5, h6 {
 /* Card detail content area */
 .card-detail-content {
   flex: 1;
+  padding: 0.5rem;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(212, 175, 55, 0.2);
 }
 
 /* Detail section for card meanings */
 .detail-section {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem;
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: 0.5rem;
+  border-left: 3px solid var(--gold);
 }
 
 /* Section titles in detail panel */
 .detail-section-title {
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: var(--gold);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   font-family: 'Cinzel', serif;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.5px;
 }
 
 /**
  * Detail Text Styling
  */
 .detail-text {
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 0.95rem;
+  line-height: 1.6;
   color: #e9d5ff;
+  padding: 0 0.5rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /**
  * Responsive Layout Adjustments
  */
-@media (max-width: 1024px) {
-  /* Stack reading container on tablets */
+@media (max-width: 1200px) {
+  /* Stack reading container on tablets and smaller screens */
   .reading-container {
     flex-direction: column;
+    align-items: center;
   }
 
   /* Adjust detail panel for tablets */
   .card-detail-panel {
-    width: 100%;
-    max-width: 900px;
+    width: 90%;
+    max-width: 600px;
     margin-left: 0;
-    margin-top: 1rem;
-    max-height: 400px;
+    margin-top: 3rem; /* Increased top margin for better separation */
+    margin-bottom: 2rem; /* Added bottom margin */
+    max-height: 500px; /* Increased max height for better content display */
+    border-width: 2px; /* Thicker border for better visibility */
   }
 }
 
 @media (max-width: 768px) {
   /* Adjust display area for smaller screens */
   .ten-card-display {
-    height: 1000px; /* Further increased height for better vertical spacing on tablets */
+    height: 1100px; /* Optimized height for better vertical spacing on tablets */
+    background-size: 10% 10%; /* Larger grid for tablets */
   }
 
   /* Scale down cards for smaller screens */
   .card-container {
-    transform: scale(0.8); /* Smaller scale to accommodate increased spacing */
+    transform: scale(0.85); /* Slightly larger scale for better visibility */
   }
 
   /* Adjust position label for better visibility on tablets */
@@ -665,15 +749,17 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   color: var(--light-gold);
   border: 1px solid rgba(212, 175, 55, 0.3);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 0 10px rgba(212, 175, 55, 0.2);
   transition: all var(--transition-medium) ease;
   cursor: pointer;
-  margin-top: 1.5rem;
+  margin-top: 3rem; /* Increased margin-top for better spacing from cards */
+  position: relative; /* Add position relative for z-index to work */
+  z-index: 30; /* Ensure button appears above cards */
 }
 
 .reset-button:hover {
   background: linear-gradient(to right, var(--deep-purple), var(--mystic-purple));
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 0 10px rgba(212, 175, 55, 0.2);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 0 15px rgba(212, 175, 55, 0.3);
   transform: translateY(-2px);
 }
 
@@ -744,6 +830,13 @@ body.light-theme .position-label {
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
+body.light-theme .card-name-label {
+  color: #4A266A;
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(74, 38, 106, 0.4);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
 body.light-theme .card-detail-panel {
   background: rgba(255, 255, 255, 0.95);
   color: #333;
@@ -776,9 +869,17 @@ body.light-theme .detail-text {
 
   /* Adjust display area height */
   .ten-card-display {
-    height: 1000px; /* Increased height for better vertical spacing on mobile */
+    height: 1200px; /* Increased height for better vertical spacing on mobile */
     max-width: 100%; /* Ensure it fits on mobile */
-    padding-bottom: 70px; /* Increased padding at the bottom for the labels */
+    padding-bottom: 150px; /* Further increased padding at the bottom for the labels */
+    background-size: 15% 15%; /* Larger grid for mobile */
+    margin-bottom: 5rem; /* Increased bottom margin for better spacing from button on mobile */
+  }
+
+  /* Adjust reset button spacing on mobile */
+  .reset-button {
+    margin-top: 4rem; /* Increased top margin on mobile */
+    margin-bottom: 2rem; /* Added bottom margin on mobile */
   }
 
   /* Smaller title for mobile */
@@ -793,9 +894,62 @@ body.light-theme .detail-text {
     padding: 4px 8px; /* Increased padding for better appearance */
   }
 
-  /* Adjust card positions for mobile */
+  /* Adjust challenge card for mobile */
   .challenge-card {
     z-index: 20 !important; /* Ensure it's above all other cards on mobile */
+    width: 180px; /* Use the height value of mobile cards */
+    height: 110px; /* Use the width value of mobile cards */
+    transform: rotate(90deg); /* Maintain horizontal orientation on mobile */
+  }
+
+  /* Adjust challenge card image for better mobile display */
+  .challenge-card .card-image {
+    max-width: 95%;
+    max-height: 95%;
+    /* Maintain proper rotation on mobile */
+    transform: rotate(-90deg) !important;
+  }
+
+  /* Maintain proper rotation for reversed cards on mobile */
+  .challenge-card .card-image.reversed {
+    transform: rotate(90deg) !important;
+  }
+
+  /* Adjust card name label for mobile */
+  .card-name-label {
+    font-size: 0.7rem;
+    padding: 0.15rem;
+  }
+
+  /* Adjust challenge card name label for mobile */
+  .challenge-card .card-name-label {
+    width: 30%;
+    font-size: 0.65rem;
+    right: 2px;
+  }
+
+  /* Adjust detail panel for mobile */
+  .card-detail-panel {
+    width: 95%;
+    max-width: 100%;
+    padding: 1rem;
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
+    max-height: 450px;
+    border-width: 2px;
+  }
+
+  /* Adjust detail panel content for mobile */
+  .detail-card-name {
+    font-size: 1.1rem;
+  }
+
+  .detail-section-title {
+    font-size: 0.9rem;
+  }
+
+  .detail-text {
+    font-size: 0.85rem;
   }
 }
 
@@ -810,8 +964,9 @@ body.light-theme .detail-text {
  * Card Content Styles
  */
 
-/* Card title */
+/* Card title - not used anymore */
 .card-title {
+  display: none;
   font-size: 0.9rem;
   font-family: 'Cinzel', serif;
   font-weight: 600;
@@ -822,18 +977,13 @@ body.light-theme .detail-text {
 /* Card image container */
 .card-image-container {
   width: 100%;
-  height: 65%;
+  height: 75%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 0.5rem;
   overflow: hidden;
-}
-
-/* Full height variant for image container */
-.card-image-container.full-height {
-  height: 100%;
-  margin-bottom: 0;
+  position: relative;
 }
 
 /* Card image */
@@ -853,45 +1003,167 @@ body.light-theme .detail-text {
   transform: rotate(180deg);
 }
 
+/* Card name label */
+.card-name-label {
+  width: 100%;
+  padding: 0.25rem;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--light-gold);
+  text-align: center;
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 0.25rem;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin: 0 auto;
+  max-width: 90%;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: transform var(--transition-medium) ease;
+  position: relative;
+  z-index: 5;
+}
+
+/* Reversed card name label */
+.card-name-label.reversed {
+  transform: rotate(180deg);
+}
+
 /**
  * Special Card Handling
  */
 
 /* Challenge card image container */
 .challenge-card .card-image-container {
-  transform: rotate(0deg) !important; /* Counter-rotate the image container */
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   height: 100%;
-  overflow: visible !important; /* Ensure the image is not clipped */
+  overflow: hidden; /* Prevent image from overflowing */
   position: relative; /* Ensure proper positioning */
+  padding: 5px;
+}
+
+/* Challenge card image container */
+.challenge-card .card-image-container {
+  width: 70%;
+  height: 100%;
+  float: left;
 }
 
 /* Challenge card image */
 .challenge-card .card-image {
-  max-width: 80%; /* Slightly smaller to fit better in rotated container */
-  max-height: 80%;
+  /* For horizontal orientation, we want to use height as the limiting factor */
+  max-height: 90%;
+  /* Width can be larger since the card is horizontal */
+  max-width: 95%;
   transform-origin: center center; /* Ensure rotation happens from the center */
-  transform: rotate(90deg) !important; /* Rotate the image to be horizontal */
+  /* Rotate the image 90 degrees counter-clockwise to display properly in horizontal card */
+  transform: rotate(-90deg) !important;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Add shadow to make image stand out */
   display: block; /* Ensure the image is displayed as a block element */
 }
 
 /* Challenge card image when reversed */
 .challenge-card .card-image.reversed {
-  transform: rotate(270deg) !important; /* Rotate reversed image to maintain horizontal orientation */
+  /* For reversed cards in horizontal orientation, rotate 90 degrees clockwise */
+  transform: rotate(90deg) !important;
+}
+
+/* Challenge card name label */
+.challenge-card .card-name-label {
+  width: 25%;
+  height: auto;
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg) !important;
+  font-size: 0.75rem;
+  padding: 0.15rem;
+  margin: 0;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(212, 175, 55, 0.6);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Challenge card name label when reversed */
+.challenge-card .card-name-label.reversed {
+  transform: translateY(-50%) rotate(90deg) !important;
+  right: auto;
+  left: 5px;
 }
 
 /* Staff indicator for visual guidance */
 .staff-indicator {
   position: absolute;
-  top: 15%;
-  left: 70%;
-  height: 60%;
+  top: 5%;
+  left: 85%;
+  height: 80%;
   opacity: 0.5;
   pointer-events: none;
+  /* Add a subtle animation to draw attention */
+  animation: staff-glow 3s ease-in-out infinite;
+}
+
+@keyframes staff-glow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+/**
+ * Button Container and Footer
+ */
+.button-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+  padding: 1rem;
+  position: relative;
+  z-index: 40;
+}
+
+.site-footer {
+  width: 100%;
+  padding: 1.5rem 0;
+  margin-top: 2rem;
+  text-align: center;
+  border-top: 1px solid rgba(212, 175, 55, 0.3);
+  background: linear-gradient(to right, rgba(15, 23, 42, 0.7), rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.7));
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.footer-content {
+  color: var(--light-gold);
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Light theme footer */
+body.light-theme .site-footer {
+  border-top: 1px solid rgba(74, 38, 106, 0.3);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.7), rgba(230, 230, 250, 0.7), rgba(255, 255, 255, 0.7));
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .footer-content {
+  color: #4A266A;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+/* Mobile adjustments for footer */
+@media (max-width: 640px) {
+  .site-footer {
+    padding: 1rem 0;
+    margin-top: 1rem;
+  }
+
+  .footer-content {
+    font-size: 0.8rem;
+  }
 }
 
 

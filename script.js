@@ -16,19 +16,19 @@ const domElements = {};
 let playCardFlipSound = window.createCardFlipSound ? window.createCardFlipSound() : null;
 
 // Define the positions for the 10-card Celtic Cross spread
-// Standard Celtic Cross layout with improved spacing and positioning
-// Increased vertical spacing between cards for better readability
+// Optimized Celtic Cross layout with improved spacing on both X and Y axes
+// Enhanced visual separation between cards for better readability
 const spreadPositions = [
-  { top: '40%', left: '30%', zIndex: 10, label: '1. Present' },           // Center/Present
-  { top: '40%', left: '30%', rotate: '90deg', zIndex: 11, label: '2. Challenge', isChallenge: true, offsetY: '-5px' },  // Crossing card - positioned on top of Present card
-  { top: '85%', left: '30%', zIndex: 3, label: '3. Foundation' },        // Below (moved even further down for more spacing)
-  { top: '0%', left: '30%', zIndex: 3, label: '4. Crown' },              // Above (moved to top)
-  { top: '40%', left: '5%', zIndex: 3, label: '5. Past' },               // Left (moved further left)
-  { top: '40%', left: '55%', zIndex: 3, label: '6. Future' },            // Right (moved further right)
-  { top: '95%', left: '75%', zIndex: 4, label: '7. Advice' },            // Bottom of staff (moved even further down for more spacing)
-  { top: '65%', left: '75%', zIndex: 5, label: '8. External' },          // Second from bottom (increased vertical spacing)
-  { top: '35%', left: '75%', zIndex: 6, label: '9. Hopes/Fears' },       // Third from bottom (increased vertical spacing)
-  { top: '5%', left: '75%', zIndex: 7, label: '10. Outcome' }            // Top of staff (moved slightly down from top for better visibility)
+  { top: '40%', left: '35%', zIndex: 10, label: '1. Present' },           // Center/Present - moved slightly right for better balance
+  { top: '40%', left: '35%', rotate: '90deg', zIndex: 11, label: '2. Challenge', isChallenge: true, offsetY: '0px' },  // Crossing card - positioned on top of Present card
+  { top: '80%', left: '35%', zIndex: 3, label: '3. Foundation' },        // Below - increased vertical spacing
+  { top: '0%', left: '35%', zIndex: 3, label: '4. Crown' },              // Above - increased vertical spacing
+  { top: '40%', left: '5%', zIndex: 3, label: '5. Past' },               // Left - increased horizontal spacing
+  { top: '40%', left: '65%', zIndex: 3, label: '6. Future' },            // Right - increased horizontal spacing
+  { top: '90%', left: '85%', zIndex: 4, label: '7. Advice' },            // Bottom of staff - moved further right and down
+  { top: '60%', left: '85%', zIndex: 5, label: '8. External' },          // Second from bottom - moved further right
+  { top: '30%', left: '85%', zIndex: 6, label: '9. Hopes/Fears' },       // Third from bottom - moved further right
+  { top: '0%', left: '85%', zIndex: 7, label: '10. Outcome' }            // Top of staff - moved further right
 ];
 
 // Create deck visualization
@@ -529,6 +529,7 @@ function drawCards() {
         // Apply specific styling for the Challenge card container
         cardContainer.style.transformOrigin = 'center center';
         cardContainer.style.transformStyle = 'preserve-3d';
+        // The rotation is now handled by CSS
       }
     }
 
@@ -551,18 +552,34 @@ function drawCards() {
     const cardFront = document.createElement('div');
     cardFront.className = 'card-front';
 
-    // Add card image to front with fallback
-    cardFront.innerHTML = `
-      <div class="card-image-container full-height">
-        <img
-          src="${imageSrc}"
-          alt="${card.name}"
-          class="card-image ${isReversed ? 'reversed' : ''}"
-          loading="eager"
-          onerror="this.onerror=null; this.src='${createFallbackCardImage(card.name)}';"
-        />
-      </div>
-    `;
+    // Add card image and name to front with fallback
+    // Clear any existing content
+    cardFront.innerHTML = '';
+
+    // Create and append image container
+    const imageContainer = document.createElement('div');
+    imageContainer.className = 'card-image-container';
+
+    // Create and append image
+    const img = document.createElement('img');
+    img.src = imageSrc;
+    img.alt = card.name;
+    img.className = `card-image ${isReversed ? 'reversed' : ''}`;
+    img.setAttribute('loading', 'eager');
+    img.onerror = function() {
+      this.onerror = null;
+      this.src = createFallbackCardImage(card.name);
+    };
+
+    // Create and append name label
+    const nameLabel = document.createElement('div');
+    nameLabel.className = `card-name-label ${isReversed ? 'reversed' : ''}`;
+    nameLabel.textContent = card.name;
+
+    // Append elements to card front
+    imageContainer.appendChild(img);
+    cardFront.appendChild(imageContainer);
+    cardFront.appendChild(nameLabel);
 
     // Add click event to show card details in the side panel
     cardContainer.addEventListener('click', () => {
@@ -609,26 +626,41 @@ function drawCards() {
         cardEl.classList.add('flipped');
         cardContainer.classList.add('flipped');
 
-        // Ensure Challenge card maintains its rotation when flipped
+        // Special handling for the Challenge card when flipped
         if (position.isChallenge) {
-          // Set the transform directly on the card element
-          cardEl.style.transform = 'rotateY(180deg) rotate(90deg)';
+          // Set the transform for the card element (just the flip, not the rotation)
+          cardEl.style.transform = 'rotateY(180deg)';
 
-          // Get the card image and adjust its rotation to be horizontal
+          // Get the card image and ensure it's in the correct orientation
           const cardImage = cardFront.querySelector('.card-image');
           if (cardImage) {
             if (isReversed) {
-              cardImage.style.transform = 'rotate(270deg)';
-            } else {
+              // For reversed challenge cards, rotate 90 degrees clockwise
               cardImage.style.transform = 'rotate(90deg)';
+            } else {
+              // For upright challenge cards, rotate 90 degrees counter-clockwise
+              cardImage.style.transform = 'rotate(-90deg)';
             }
           }
 
-          // Ensure the card front also has the correct transform
-          cardFront.style.transform = 'rotateY(180deg) rotate(90deg)';
+          // Also ensure the name label is properly positioned
+          const nameLabel = cardFront.querySelector('.card-name-label');
+          if (nameLabel) {
+            if (isReversed) {
+              nameLabel.style.transform = 'translateY(-50%) rotate(90deg)';
+              nameLabel.style.left = '5px';
+              nameLabel.style.right = 'auto';
+            } else {
+              nameLabel.style.transform = 'translateY(-50%) rotate(-90deg)';
+              nameLabel.style.right = '5px';
+              nameLabel.style.left = 'auto';
+            }
+          }
 
           // Make sure the card container has the correct z-index
           cardContainer.style.zIndex = '11';
+
+          // The container rotation is now handled by CSS
         }
 
         // Draw the next card after this one is flipped
