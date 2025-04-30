@@ -840,14 +840,58 @@ body.light-theme .card-name-label {
 body.light-theme .card-detail-panel {
   background: rgba(255, 255, 255, 0.95);
   color: #333;
+  border: 2px solid rgba(74, 38, 106, 0.4);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 0 15px rgba(74, 38, 106, 0.2);
+}
+
+body.light-theme .card-detail-header {
+  background: linear-gradient(to right, rgba(167, 139, 250, 0.3), rgba(139, 92, 246, 0.2));
+  border-bottom: 2px solid rgba(74, 38, 106, 0.3);
+}
+
+body.light-theme .detail-card-name {
+  color: #4A266A;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+body.light-theme .close-detail-btn {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(74, 38, 106, 0.3);
+  color: #4A266A;
+}
+
+body.light-theme .close-detail-btn:hover {
+  background: rgba(139, 92, 246, 0.2);
+}
+
+body.light-theme .card-detail-image-container {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), rgba(230, 230, 250, 0.7));
+  border: 1px solid rgba(74, 38, 106, 0.2);
+}
+
+body.light-theme .detail-card-image {
+  border: 2px solid rgba(74, 38, 106, 0.4);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2), 0 0 10px rgba(74, 38, 106, 0.2);
+}
+
+body.light-theme .card-detail-content {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(74, 38, 106, 0.2);
+}
+
+body.light-theme .detail-section {
+  background: rgba(230, 230, 250, 0.5);
+  border-left: 3px solid #4A266A;
 }
 
 body.light-theme .detail-section-title {
   color: #4A266A;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 body.light-theme .detail-text {
   color: #333;
+  text-shadow: none;
 }
 
 /**
@@ -960,6 +1004,37 @@ body.light-theme .detail-text {
   display: none !important;
 }
 
+/* Animation for card detail panel */
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out forwards;
+}
+
+.fade-out {
+  animation: fadeOut 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+}
+
 /**
  * Card Content Styles
  */
@@ -986,7 +1061,7 @@ body.light-theme .detail-text {
   position: relative;
 }
 
-/* Card image */
+/* Card image with enhanced visual effects */
 .card-image {
   width: auto;
   height: auto;
@@ -994,13 +1069,17 @@ body.light-theme .detail-text {
   max-height: 90%;
   object-fit: contain;
   border-radius: 0.25rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  transition: transform var(--transition-medium) ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 10px rgba(255, 255, 255, 0.1);
+  transition: all var(--transition-medium) ease;
+  filter: brightness(1.05); /* Slightly brighter for upright cards */
 }
 
-/* Reversed card image */
+/* Enhanced reversed card image with visual effects */
 .card-image.reversed {
   transform: rotate(180deg);
+  filter: brightness(0.9) contrast(1.1) saturate(0.95); /* Darker, more contrast for reversed */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), 0 0 12px rgba(255, 0, 0, 0.15);
+  border: 1px solid rgba(255, 100, 100, 0.2); /* Subtle red border for reversed cards */
 }
 
 /* Card name label */
@@ -1052,7 +1131,7 @@ body.light-theme .detail-text {
   float: left;
 }
 
-/* Challenge card image */
+/* Challenge card image with enhanced visual effects */
 .challenge-card .card-image {
   /* For horizontal orientation, we want to use height as the limiting factor */
   max-height: 90%;
@@ -1061,14 +1140,20 @@ body.light-theme .detail-text {
   transform-origin: center center; /* Ensure rotation happens from the center */
   /* Rotate the image 90 degrees counter-clockwise to display properly in horizontal card */
   transform: rotate(-90deg) !important;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Add shadow to make image stand out */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 255, 255, 0.15); /* Enhanced shadow */
   display: block; /* Ensure the image is displayed as a block element */
+  filter: brightness(1.05) saturate(1.05); /* Slightly enhanced colors for upright challenge cards */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border for upright challenge cards */
+  transition: all var(--transition-medium) ease;
 }
 
-/* Challenge card image when reversed */
+/* Challenge card image when reversed with enhanced visual effects */
 .challenge-card .card-image.reversed {
   /* For reversed cards in horizontal orientation, rotate 90 degrees clockwise */
   transform: rotate(90deg) !important;
+  filter: brightness(0.9) contrast(1.15) saturate(0.9); /* Darker, more contrast for reversed */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), 0 0 15px rgba(255, 0, 0, 0.2); /* Red-tinted shadow */
+  border: 1px solid rgba(255, 100, 100, 0.3); /* More visible red border for reversed challenge cards */
 }
 
 /* Challenge card name label */

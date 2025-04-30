@@ -16,19 +16,19 @@ const domElements = {};
 let playCardFlipSound = window.createCardFlipSound ? window.createCardFlipSound() : null;
 
 // Define the positions for the 10-card Celtic Cross spread
-// Optimized Celtic Cross layout with improved spacing on both X and Y axes
+// Further optimized Celtic Cross layout with improved spacing on both X and Y axes
 // Enhanced visual separation between cards for better readability
 const spreadPositions = [
-  { top: '40%', left: '35%', zIndex: 10, label: '1. Present' },           // Center/Present - moved slightly right for better balance
-  { top: '40%', left: '35%', rotate: '90deg', zIndex: 11, label: '2. Challenge', isChallenge: true, offsetY: '0px' },  // Crossing card - positioned on top of Present card
-  { top: '80%', left: '35%', zIndex: 3, label: '3. Foundation' },        // Below - increased vertical spacing
-  { top: '0%', left: '35%', zIndex: 3, label: '4. Crown' },              // Above - increased vertical spacing
-  { top: '40%', left: '5%', zIndex: 3, label: '5. Past' },               // Left - increased horizontal spacing
-  { top: '40%', left: '65%', zIndex: 3, label: '6. Future' },            // Right - increased horizontal spacing
-  { top: '90%', left: '85%', zIndex: 4, label: '7. Advice' },            // Bottom of staff - moved further right and down
-  { top: '60%', left: '85%', zIndex: 5, label: '8. External' },          // Second from bottom - moved further right
-  { top: '30%', left: '85%', zIndex: 6, label: '9. Hopes/Fears' },       // Third from bottom - moved further right
-  { top: '0%', left: '85%', zIndex: 7, label: '10. Outcome' }            // Top of staff - moved further right
+  { top: '40%', left: '32%', zIndex: 10, label: '1. Present' },           // Center/Present - adjusted for better balance
+  { top: '40%', left: '32%', rotate: '90deg', zIndex: 11, label: '2. Challenge', isChallenge: true, offsetY: '0px' },  // Crossing card - positioned on top of Present card
+  { top: '85%', left: '32%', zIndex: 3, label: '3. Foundation' },        // Below - further increased vertical spacing
+  { top: '-5%', left: '32%', zIndex: 3, label: '4. Crown' },             // Above - further increased vertical spacing
+  { top: '40%', left: '2%', zIndex: 3, label: '5. Past' },               // Left - further increased horizontal spacing
+  { top: '40%', left: '62%', zIndex: 3, label: '6. Future' },            // Right - adjusted horizontal spacing
+  { top: '95%', left: '88%', zIndex: 4, label: '7. Advice' },            // Bottom of staff - further increased spacing
+  { top: '65%', left: '88%', zIndex: 5, label: '8. External' },          // Second from bottom - adjusted vertical spacing
+  { top: '35%', left: '88%', zIndex: 6, label: '9. Hopes/Fears' },       // Third from bottom - adjusted vertical spacing
+  { top: '5%', left: '88%', zIndex: 7, label: '10. Outcome' }            // Top of staff - adjusted vertical spacing
 ];
 
 // Create deck visualization
@@ -111,7 +111,7 @@ function cacheElements() {
  * Load tarot card data from JSON file
  */
 function loadTarotData() {
-  fetch('tarot.json')
+  fetch('newtarot.json')
     .then(response => {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -119,7 +119,8 @@ function loadTarotData() {
       return response.json();
     })
     .then(data => {
-      tarotData = data.cards;
+      // The new JSON structure is an array directly, not an object with a cards property
+      tarotData = data;
       createDeck();
       createStars(); // Create the mystical star background
       initializeEventListeners(); // Set up all event listeners
@@ -242,11 +243,13 @@ function showCardDetails(card, isReversed, meaning, imageSrc, positionLabel) {
   }
 
   if (domElements.cardDesc) {
-    domElements.cardDesc.textContent = card.desc || 'No description available';
+    domElements.cardDesc.textContent = card.description || 'No description available';
   }
 
   if (domElements.cardMeaning) {
-    domElements.cardMeaning.textContent = meaning || 'No meaning available';
+    // Show the meaning with keywords
+    const keywords = isReversed ? card.keywords.reversed : card.keywords.upright;
+    domElements.cardMeaning.textContent = `${keywords}: ${meaning || 'No meaning available'}`;
   }
 
   // Show the panel with a fade-in effect
@@ -485,7 +488,10 @@ function drawCards() {
 
     const card = selectedCards[index];
     const isReversed = Math.random() < 0.5;
-    const meaning = isReversed ? card.meaning_rev : card.meaning_up;
+    // Get the appropriate meaning based on the new JSON structure
+    const meaning = isReversed
+      ? card.reversed_meanings.general
+      : card.upright_meanings.general;
 
     // Get image file name and path
     const imageName = getImageFileName(card);
@@ -566,6 +572,16 @@ function drawCards() {
     img.alt = card.name;
     img.className = `card-image ${isReversed ? 'reversed' : ''}`;
     img.setAttribute('loading', 'eager');
+
+    // Enhanced visual effects for reversed cards
+    if (isReversed) {
+      img.style.filter = 'brightness(0.9) contrast(1.1)';
+      img.style.boxShadow = '0 0 10px rgba(255, 0, 0, 0.2)';
+    } else {
+      img.style.filter = 'brightness(1.05)';
+      img.style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.2)';
+    }
+
     img.onerror = function() {
       this.onerror = null;
       this.src = createFallbackCardImage(card.name);
@@ -626,7 +642,7 @@ function drawCards() {
         cardEl.classList.add('flipped');
         cardContainer.classList.add('flipped');
 
-        // Special handling for the Challenge card when flipped
+        // Enhanced special handling for the Challenge card when flipped
         if (position.isChallenge) {
           // Set the transform for the card element (just the flip, not the rotation)
           cardEl.style.transform = 'rotateY(180deg)';
@@ -635,30 +651,39 @@ function drawCards() {
           const cardImage = cardFront.querySelector('.card-image');
           if (cardImage) {
             if (isReversed) {
-              // For reversed challenge cards, rotate 90 degrees clockwise
+              // For reversed challenge cards, rotate 90 degrees clockwise with enhanced visual effect
               cardImage.style.transform = 'rotate(90deg)';
+              cardImage.style.filter = 'brightness(0.85) contrast(1.15) saturate(0.9)';
+              cardImage.style.boxShadow = '0 0 15px rgba(255, 0, 0, 0.3)';
             } else {
-              // For upright challenge cards, rotate 90 degrees counter-clockwise
+              // For upright challenge cards, rotate 90 degrees counter-clockwise with enhanced visual effect
               cardImage.style.transform = 'rotate(-90deg)';
+              cardImage.style.filter = 'brightness(1.1) saturate(1.05)';
+              cardImage.style.boxShadow = '0 0 15px rgba(255, 255, 255, 0.3)';
             }
           }
 
-          // Also ensure the name label is properly positioned
+          // Also ensure the name label is properly positioned with enhanced styling
           const nameLabel = cardFront.querySelector('.card-name-label');
           if (nameLabel) {
             if (isReversed) {
               nameLabel.style.transform = 'translateY(-50%) rotate(90deg)';
               nameLabel.style.left = '5px';
               nameLabel.style.right = 'auto';
+              nameLabel.style.color = 'rgba(255, 200, 200, 0.9)';
             } else {
               nameLabel.style.transform = 'translateY(-50%) rotate(-90deg)';
               nameLabel.style.right = '5px';
               nameLabel.style.left = 'auto';
+              nameLabel.style.color = 'rgba(200, 255, 200, 0.9)';
             }
           }
 
-          // Make sure the card container has the correct z-index
+          // Make sure the card container has the correct z-index and enhanced styling
           cardContainer.style.zIndex = '11';
+          cardContainer.style.boxShadow = isReversed ?
+            '0 0 20px rgba(255, 100, 100, 0.3)' :
+            '0 0 20px rgba(100, 255, 100, 0.3)';
 
           // The container rotation is now handled by CSS
         }
