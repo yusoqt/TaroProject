@@ -217,6 +217,37 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: inset 0 0 20px rgba(212, 175, 55, 0.4);
 }
 
+/* Card selected state - animation for when a card is clicked */
+.card-selected {
+  transform: translateZ(50px) scale(1.05) !important;
+  z-index: 3000 !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.6) !important;
+}
+
+/* Challenge card selected state */
+.challenge-card.card-selected {
+  transform: translateZ(50px) scale(1.05) rotate(0deg) !important;
+  z-index: 3000 !important;
+}
+
+/* Reversed card selected state - flip back to normal orientation */
+.card-selected .card-image.reversed,
+.card-selected .card-name-label.reversed {
+  transform: rotate(0deg) !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Challenge card image when selected */
+.challenge-card.card-selected .card-image.challenge {
+  transform: rotate(0deg) !important;
+}
+
+/* Challenge card image when selected and reversed */
+.challenge-card.card-selected .card-image.challenge.reversed {
+  transform: rotate(0deg) !important;
+}
+
 /* Card entrance animation */
 .card-enter {
   opacity: 0;
@@ -229,12 +260,12 @@ h1, h2, h3, h4, h5, h6 {
   transition: opacity var(--transition-slow), transform var(--transition-slow);
 }
 
-/* Card hover effects */
+/* Card hover effects - consolidated */
 .card-container:hover {
-  transform: translateY(-5px) scale(1.03); /* เพิ่มขนาดเล็กน้อยเมื่อโฮเวอร์ */
+  transform: translateY(-5px) scale(1.03);
   transition: transform var(--transition-medium) ease, box-shadow var(--transition-medium) ease;
   z-index: 2000 !important; /* Ensure hovered card is above all others */
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(212, 175, 55, 0.5); /* เพิ่มเงาและแสงสีทองเมื่อโฮเวอร์ */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(212, 175, 55, 0.5);
 }
 
 /* Special hover effect for challenge card */
@@ -242,10 +273,9 @@ h1, h2, h3, h4, h5, h6 {
   /* Keep the 90deg rotation but add the hover effects */
   transform: translateY(-5px) scale(1.03) rotate(90deg) !important;
   z-index: 2000 !important;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(212, 175, 55, 0.5) !important; /* Use the same shadow as normal cards */
 }
 
-/* Card hover effect with offset */
+/* Card hover effect with offset - use CSS variable for dynamic offset */
 .card-container[data-offset-y]:hover {
   transform: translateY(calc(-5px + var(--offset-y, 0))) scale(1.02);
 }
@@ -537,7 +567,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Card detail side panel */
 .card-detail-panel {
-  width: 350px; /* Increased width for better readability */
+  width: 400px; /* Increased width for better readability */
   background: rgba(15, 23, 42, 0.95); /* Slightly more opaque background */
   border: 1px solid var(--gold);
   border-radius: 0.75rem;
@@ -551,6 +581,23 @@ h1, h2, h3, h4, h5, h6 {
   transition: all var(--transition-medium) ease;
   position: relative; /* Added position relative for z-index */
   z-index: 100; /* Ensure it's above cards */
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) rgba(15, 23, 42, 0.5);
+}
+
+/* Custom scrollbar for webkit browsers */
+.card-detail-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.card-detail-panel::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 4px;
+}
+
+.card-detail-panel::-webkit-scrollbar-thumb {
+  background-color: var(--gold);
+  border-radius: 4px;
 }
 
 /* Panel header with title and close button */
@@ -565,6 +612,9 @@ h1, h2, h3, h4, h5, h6 {
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .detail-card-name {
@@ -614,8 +664,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Card image in detail panel */
 .detail-card-image {
-  max-width: 220px;
-  max-height: 320px;
+  max-width: 180px;
+  max-height: 280px;
   object-fit: contain;
   border-radius: 0.5rem;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 10px rgba(212, 175, 55, 0.3);
@@ -640,17 +690,55 @@ h1, h2, h3, h4, h5, h6 {
 /* Detail section for card meanings */
 .detail-section {
   margin-bottom: 1.5rem;
-  padding: 0.75rem;
   background: rgba(15, 23, 42, 0.7);
   border-radius: 0.5rem;
   border-left: 3px solid var(--gold);
+  overflow: hidden;
+}
+
+/* Section header with collapsible functionality */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(to right, rgba(74, 38, 106, 0.3), rgba(15, 23, 42, 0.2));
+  cursor: pointer;
+  transition: background var(--transition-medium) ease;
+}
+
+.section-header:hover {
+  background: linear-gradient(to right, rgba(74, 38, 106, 0.5), rgba(15, 23, 42, 0.3));
+}
+
+.section-header i, .collapsible i {
+  color: var(--gold);
+  transition: transform var(--transition-medium) ease;
+}
+
+.section-header.active i, .collapsible.active i {
+  transform: rotate(180deg);
+}
+
+/* Section content that can be collapsed */
+.section-content {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0;
+  transition: max-height 0.5s ease-in-out, padding var(--transition-medium) ease;
+}
+
+.section-content.active {
+  max-height: 9999px; /* Very large value to ensure all content is visible */
+  padding: 1rem;
+  transition: max-height 0.7s ease-in-out, padding var(--transition-medium) ease;
 }
 
 /* Section titles in detail panel */
 .detail-section-title {
   font-size: 1.1rem;
   color: var(--gold);
-  margin-bottom: 0.75rem;
+  margin: 0;
   font-family: 'Cinzel', serif;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   letter-spacing: 0.5px;
@@ -665,6 +753,186 @@ h1, h2, h3, h4, h5, h6 {
   color: #e9d5ff;
   padding: 0 0.5rem;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  margin: 0.5rem 0;
+}
+
+/* Keywords styling */
+.keywords-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.keyword-group {
+  flex: 1;
+  min-width: 120px;
+}
+
+.keyword-title {
+  font-size: 0.9rem;
+  margin: 0 0 0.5rem 0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  display: inline-block;
+}
+
+.keyword-title.upright {
+  background: rgba(74, 222, 128, 0.2);
+  color: #86efac;
+  border-left: 2px solid #86efac;
+}
+
+.keyword-title.reversed {
+  background: rgba(248, 113, 113, 0.2);
+  color: #fca5a5;
+  border-left: 2px solid #fca5a5;
+}
+
+/* Quotes styling */
+.quotes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.quote-item {
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  border-left: 2px solid var(--light-gold);
+  font-style: italic;
+}
+
+.quote-author {
+  display: block;
+  text-align: right;
+  font-style: normal;
+  font-size: 0.85rem;
+  color: var(--light-gold);
+  margin-top: 0.5rem;
+}
+
+/* Meanings tabs styling */
+.meanings-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+  padding-bottom: 0.5rem;
+}
+
+.meaning-tab {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 0.25rem;
+  color: #e9d5ff;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all var(--transition-fast) ease;
+}
+
+.meaning-tab:hover {
+  background: rgba(74, 38, 106, 0.5);
+  border-color: var(--gold);
+}
+
+.meaning-tab.active {
+  background: linear-gradient(to bottom, rgba(74, 38, 106, 0.8), rgba(45, 20, 65, 0.8));
+  border-color: var(--gold);
+  color: var(--light-gold);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.meanings-content {
+  position: relative;
+}
+
+.meaning-content {
+  display: none;
+}
+
+.meaning-content.active {
+  display: block;
+  animation: fadeIn var(--transition-medium) ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Journaling prompts styling */
+.prompts-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.prompts-list li {
+  position: relative;
+  padding: 0.5rem 0.5rem 0.5rem 1.5rem;
+  margin-bottom: 0.75rem;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 0.25rem;
+  border-left: 2px solid var(--light-gold);
+}
+
+.prompts-list li::before {
+  content: '✧';
+  position: absolute;
+  left: 0.5rem;
+  color: var(--gold);
+}
+
+/* Combinations styling */
+.combinations-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.combination-group {
+  margin-bottom: 0.5rem;
+}
+
+.combination-title {
+  font-size: 0.9rem;
+  margin: 0 0 0.75rem 0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  display: inline-block;
+}
+
+.combination-title.upright {
+  background: rgba(74, 222, 128, 0.2);
+  color: #86efac;
+  border-left: 2px solid #86efac;
+}
+
+.combination-title.reversed {
+  background: rgba(248, 113, 113, 0.2);
+  color: #fca5a5;
+  border-left: 2px solid #fca5a5;
+}
+
+.combination-item {
+  display: flex;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-left: 2px solid rgba(212, 175, 55, 0.5);
+}
+
+.combination-card {
+  font-weight: 600;
+  color: var(--light-gold);
+  margin-right: 0.5rem;
+  padding-right: 0.5rem;
+  border-right: 1px solid rgba(212, 175, 55, 0.3);
 }
 
 /**
@@ -684,8 +952,24 @@ h1, h2, h3, h4, h5, h6 {
     margin-left: 0;
     margin-top: 3rem; /* Increased top margin for better separation */
     margin-bottom: 2rem; /* Added bottom margin */
-    max-height: 500px; /* Increased max height for better content display */
+    max-height: 600px; /* Increased max height for better content display */
     border-width: 2px; /* Thicker border for better visibility */
+  }
+
+  /* Adjust keywords container for better mobile layout */
+  .keywords-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* Adjust meaning tabs for better mobile layout */
+  .meanings-tabs {
+    justify-content: center;
+  }
+
+  .meaning-tab {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.8rem;
   }
 }
 
@@ -707,60 +991,131 @@ h1, h2, h3, h4, h5, h6 {
     padding: 3px 6px;
     bottom: -30px; /* Move labels closer to cards */
   }
+
+  /* Further adjust detail panel for mobile */
+  .card-detail-panel {
+    max-height: 500px;
+    padding: 1rem;
+  }
+
+  /* Smaller card image on mobile */
+  .detail-card-image {
+    max-width: 150px;
+    max-height: 240px;
+  }
+
+  /* Adjust section headers for mobile */
+  .section-header {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .detail-section-title {
+    font-size: 1rem;
+  }
+
+  /* Adjust detail text for mobile */
+  .detail-text {
+    font-size: 0.9rem;
+    padding: 0 0.25rem;
+  }
+
+  /* Adjust meaning tabs for mobile */
+  .meanings-tabs {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.3rem;
+  }
+
+  .meaning-tab {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.75rem;
+  }
 }
 
-/**
- * Theme Toggle Button
- */
-.theme-toggle {
-  position: fixed;
-  top: 1rem;
-  right: 5rem;
-  background: linear-gradient(to right, var(--mystic-purple), var(--deep-purple));
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--light-gold);
-  font-size: 1.25rem;
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  z-index: 50;
-  transition: all var(--transition-medium) ease;
-  cursor: pointer;
+@media (max-width: 480px) {
+  /* Even smaller screens */
+  .card-detail-panel {
+    width: 95%;
+    padding: 0.75rem;
+  }
+
+  .card-detail-header {
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .detail-card-name {
+    font-size: 1.1rem;
+  }
+
+  .section-content.active {
+    padding: 0.75rem;
+  }
 }
 
-.theme-toggle:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 0 10px rgba(212, 175, 55, 0.2);
-  transform: translateY(-2px);
-}
+
 
 /**
  * Reset Button
  */
-.reset-button {
-  background: linear-gradient(to right, var(--mystic-purple), var(--deep-purple));
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-size: 1rem;
+.reset-button, #resetBtn {
+  background: linear-gradient(135deg, var(--mystic-purple), var(--deep-purple), var(--midnight-blue));
+  padding: 0.85rem 2rem;
+  border-radius: 0.75rem;
+  font-size: 1.1rem;
   font-family: 'Cinzel', serif;
   font-weight: 600;
   color: var(--light-gold);
   border: 1px solid rgba(212, 175, 55, 0.3);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 0 10px rgba(212, 175, 55, 0.2);
-  transition: all var(--transition-medium) ease;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2), 0 0 15px rgba(212, 175, 55, 0.2);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
   margin-top: 3rem; /* Increased margin-top for better spacing from cards */
   position: relative; /* Add position relative for z-index to work */
   z-index: 30; /* Ensure button appears above cards */
+  overflow: hidden;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.reset-button:hover {
-  background: linear-gradient(to right, var(--deep-purple), var(--mystic-purple));
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 0 15px rgba(212, 175, 55, 0.3);
-  transform: translateY(-2px);
+.reset-button:hover, #resetBtn:hover {
+  background: linear-gradient(135deg, var(--deep-purple), var(--mystic-purple), var(--deep-purple));
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25), 0 0 20px rgba(212, 175, 55, 0.4);
+  transform: translateY(-3px) scale(1.03);
+  letter-spacing: 1px;
+  color: white;
+}
+
+.reset-button:active, #resetBtn:active {
+  transform: translateY(1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 0 10px rgba(212, 175, 55, 0.3);
+  transition-duration: 0.1s;
+}
+
+/* Decorative elements for the reset button */
+#resetBtn::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, var(--gold), transparent, var(--gold), transparent);
+  background-size: 400% 400%;
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.5s ease;
+  border-radius: 0.85rem;
+  animation: resetButtonGlow 3s ease-in-out infinite;
+}
+
+#resetBtn:hover::before {
+  opacity: 0.3;
+}
+
+@keyframes resetButtonGlow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 
 /**
@@ -782,117 +1137,7 @@ h1, h2, h3, h4, h5, h6 {
   100% { transform: rotate(360deg); }
 }
 
-/**
- * Light Theme Styles
- */
-body.light-theme {
-  background: linear-gradient(to bottom right, #e9d5ff, #c4b5fd, #f5f5f5);
-  color: #333;
-}
 
-/* Typography in light theme */
-body.light-theme .main-title,
-body.light-theme h1,
-body.light-theme h2,
-body.light-theme h3,
-body.light-theme h4,
-body.light-theme h5,
-body.light-theme h6 {
-  color: #4A266A;
-}
-
-/* Buttons in light theme */
-body.light-theme .primary-button,
-body.light-theme .reset-button {
-  background: linear-gradient(to right, #a78bfa, #8b5cf6);
-  color: white;
-  border: 1px solid rgba(74, 38, 106, 0.3);
-}
-
-body.light-theme .primary-button:hover,
-body.light-theme .reset-button:hover {
-  background: linear-gradient(to right, #8b5cf6, #7c3aed);
-}
-
-/* Cards in light theme */
-body.light-theme .card-back {
-  background: linear-gradient(135deg, #a78bfa, #8b5cf6);
-}
-
-body.light-theme .card-front {
-  background: rgba(255, 255, 255, 0.9);
-  color: #333;
-}
-
-/* Labels and panels in light theme */
-body.light-theme .position-label {
-  color: #4A266A;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-}
-
-body.light-theme .card-name-label {
-  color: #4A266A;
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(74, 38, 106, 0.4);
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-}
-
-body.light-theme .card-detail-panel {
-  background: rgba(255, 255, 255, 0.95);
-  color: #333;
-  border: 2px solid rgba(74, 38, 106, 0.4);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 0 15px rgba(74, 38, 106, 0.2);
-}
-
-body.light-theme .card-detail-header {
-  background: linear-gradient(to right, rgba(167, 139, 250, 0.3), rgba(139, 92, 246, 0.2));
-  border-bottom: 2px solid rgba(74, 38, 106, 0.3);
-}
-
-body.light-theme .detail-card-name {
-  color: #4A266A;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-}
-
-body.light-theme .close-detail-btn {
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(74, 38, 106, 0.3);
-  color: #4A266A;
-}
-
-body.light-theme .close-detail-btn:hover {
-  background: rgba(139, 92, 246, 0.2);
-}
-
-body.light-theme .card-detail-image-container {
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), rgba(230, 230, 250, 0.7));
-  border: 1px solid rgba(74, 38, 106, 0.2);
-}
-
-body.light-theme .detail-card-image {
-  border: 2px solid rgba(74, 38, 106, 0.4);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2), 0 0 10px rgba(74, 38, 106, 0.2);
-}
-
-body.light-theme .card-detail-content {
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(74, 38, 106, 0.2);
-}
-
-body.light-theme .detail-section {
-  background: rgba(230, 230, 250, 0.5);
-  border-left: 3px solid #4A266A;
-}
-
-body.light-theme .detail-section-title {
-  color: #4A266A;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-}
-
-body.light-theme .detail-text {
-  color: #333;
-  text-shadow: none;
-}
 
 /**
  * Responsive Adjustments
@@ -1132,7 +1377,7 @@ body.light-theme .detail-text {
 }
 
 /* Challenge card image with enhanced visual effects */
-.challenge-card .card-image {
+.card-image.challenge {
   /* For horizontal orientation, we want to use height as the limiting factor */
   max-height: 90%;
   /* Width can be larger since the card is horizontal */
@@ -1148,7 +1393,7 @@ body.light-theme .detail-text {
 }
 
 /* Challenge card image when reversed with enhanced visual effects */
-.challenge-card .card-image.reversed {
+.card-image.challenge.reversed {
   /* For reversed cards in horizontal orientation, rotate 90 degrees clockwise */
   transform: rotate(90deg) !important;
   filter: brightness(0.9) contrast(1.15) saturate(0.9); /* Darker, more contrast for reversed */
@@ -1156,8 +1401,15 @@ body.light-theme .detail-text {
   border: 1px solid rgba(255, 100, 100, 0.3); /* More visible red border for reversed challenge cards */
 }
 
+/* For backward compatibility */
+.challenge-card .card-image {
+  max-height: 90%;
+  max-width: 95%;
+  transform-origin: center center;
+}
+
 /* Challenge card name label */
-.challenge-card .card-name-label {
+.card-name-label.challenge {
   width: 25%;
   height: auto;
   position: absolute;
@@ -1173,10 +1425,17 @@ body.light-theme .detail-text {
 }
 
 /* Challenge card name label when reversed */
-.challenge-card .card-name-label.reversed {
+.card-name-label.challenge.reversed {
   transform: translateY(-50%) rotate(90deg) !important;
   right: auto;
   left: 5px;
+}
+
+/* For backward compatibility */
+.challenge-card .card-name-label {
+  width: 25%;
+  position: absolute;
+  top: 50%;
 }
 
 /* Staff indicator for visual guidance */
@@ -1227,17 +1486,7 @@ body.light-theme .detail-text {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* Light theme footer */
-body.light-theme .site-footer {
-  border-top: 1px solid rgba(74, 38, 106, 0.3);
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.7), rgba(230, 230, 250, 0.7), rgba(255, 255, 255, 0.7));
-  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
-}
 
-body.light-theme .footer-content {
-  color: #4A266A;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-}
 
 /* Mobile adjustments for footer */
 @media (max-width: 640px) {

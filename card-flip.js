@@ -6,63 +6,73 @@
  */
 
 function createCardFlipSound() {
-  // Check if AudioContext is available
-  if (typeof AudioContext === 'undefined' && typeof webkitAudioContext === 'undefined') {
-    console.warn('Web Audio API is not supported in this browser');
-    return null;
-  }
+  // Create a single AudioContext instance
+  let audioContext;
 
   try {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    const audioContext = new AudioContextClass();
+    // Handle browser compatibility for AudioContext
+    let AudioContextClass = null;
 
-    // Create a function that generates a card flip sound
-    return function playCardFlip() {
-      try {
-        // Resume audio context if it was suspended (needed for some browsers)
-        if (audioContext.state === 'suspended') {
-          audioContext.resume();
-        }
+    if (window.AudioContext) {
+      AudioContextClass = window.AudioContext;
+    } else if (window['webkitAudioContext']) {
+      // For older browsers that use the webkit prefix
+      AudioContextClass = window['webkitAudioContext'];
+    }
 
-        // Create oscillator and gain nodes
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        const filterNode = audioContext.createBiquadFilter();
+    if (!AudioContextClass) {
+      console.warn('Web Audio API is not supported in this browser');
+      return null;
+    }
 
-        // Connect the nodes
-        oscillator.connect(filterNode);
-        filterNode.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-
-        // Set parameters for a more realistic card flip sound
-        oscillator.type = 'triangle';
-        oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(60, audioContext.currentTime + 0.2);
-
-        // Add filter for a more natural sound
-        filterNode.type = 'lowpass';
-        filterNode.frequency.setValueAtTime(800, audioContext.currentTime);
-        filterNode.frequency.exponentialRampToValueAtTime(300, audioContext.currentTime + 0.2);
-
-        // Volume envelope
-        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.02);
-        gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.2);
-
-        // Start and stop the oscillator
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + 0.2);
-
-        return audioContext;
-      } catch (error) {
-        console.error('Error playing card flip sound:', error);
-        return null;
-      }
-    };
+    audioContext = new AudioContextClass();
   } catch (error) {
     console.error('Error creating audio context:', error);
     return null;
   }
+
+  // Return the sound player function
+  return function playCardFlip() {
+    if (!audioContext) return null;
+
+    try {
+      // Resume audio context if it was suspended (needed for some browsers)
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+
+      // Create and connect audio nodes
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      const filterNode = audioContext.createBiquadFilter();
+
+      oscillator.connect(filterNode);
+      filterNode.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      // Configure sound parameters
+      oscillator.type = 'triangle';
+      oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(60, audioContext.currentTime + 0.2);
+
+      filterNode.type = 'lowpass';
+      filterNode.frequency.setValueAtTime(800, audioContext.currentTime);
+      filterNode.frequency.exponentialRampToValueAtTime(300, audioContext.currentTime + 0.2);
+
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.02);
+      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.2);
+
+      // Play the sound
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.2);
+
+      return true;
+    } catch (error) {
+      console.error('Error playing card flip sound:', error);
+      return null;
+    }
+  };
 }
 
 // Export the function

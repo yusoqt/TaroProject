@@ -8,88 +8,603 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'mystic-purple': '#4A266A',
+            'deep-purple': '#2D1441',
+            'midnight-blue': '#0F172A',
+            'gold': '#D4AF37',
+            'light-gold': '#F1E5AC',
+          },
+          fontFamily: {
+            'cinzel': ['Cinzel', 'serif'],
+            'cormorant': ['Cormorant Garamond', 'serif'],
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'twinkle': 'twinkle 4s ease-in-out infinite',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'spin-slow': 'spin 3s linear infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            twinkle: {
+              '0%, 100%': { opacity: '0.2' },
+              '50%': { opacity: '1' },
+            }
+          },
+          boxShadow: {
+            'card': '0 8px 20px rgba(0, 0, 0, 0.4)',
+            'gold-glow': '0 0 15px rgba(212, 175, 55, 0.3)',
+          }
+        }
+      }
+    }
+  </script>
   <link rel="stylesheet" href="styles.css">
   <!-- Add Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="bg-gradient-to-br from-deep-purple via-midnight-blue to-black text-white min-h-screen flex flex-col items-center justify-start py-8 px-4 font-cormorant overflow-x-hidden">
   <!-- Mystical background with stars -->
-  <div class="mystical-bg" id="starsContainer"></div>
+  <div class="fixed top-0 left-0 w-full h-full pointer-events-none z-[-1] opacity-40" id="starsContainer"></div>
 
-  <!-- Sound toggle button -->
-  <button id="soundToggle" class="sound-toggle" aria-label="Toggle sound">
-    <i class="fas fa-volume-up"></i>
+  <!-- Decorative top border -->
+  <div class="fixed top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold/30 to-transparent"></div>
+
+  <!-- Decorative corner elements -->
+  <div class="fixed top-4 left-4 w-16 h-16 border-t border-l border-gold/20 rounded-tl-lg pointer-events-none"></div>
+  <div class="fixed top-4 right-4 w-16 h-16 border-t border-r border-gold/20 rounded-tr-lg pointer-events-none"></div>
+  <div class="fixed bottom-4 left-4 w-16 h-16 border-b border-l border-gold/20 rounded-bl-lg pointer-events-none"></div>
+  <div class="fixed bottom-4 right-4 w-16 h-16 border-b border-r border-gold/20 rounded-br-lg pointer-events-none"></div>
+
+  <!-- Sound toggle button with enhanced styling -->
+  <button id="soundToggle" class="fixed top-6 left-6 z-50 w-12 h-12 rounded-full bg-gradient-to-br from-mystic-purple to-deep-purple text-gold hover:text-light-gold transition-all duration-300 flex items-center justify-center shadow-lg backdrop-blur-sm border border-gold/30 group" aria-label="Toggle sound">
+    <div class="absolute inset-0 rounded-full bg-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+    <i class="fas fa-volume-up relative z-10"></i>
   </button>
 
-  <!-- Theme toggle button -->
-  <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
-    <i class="fas fa-moon"></i>
-  </button>
 
-  <h1 class="main-title">✧ Mystical Tarot Reading ✧</h1>
 
-  <div id="deckContainer" class="deck floating">
-    <!-- Deck cards will be added here by JavaScript -->
+  <!-- Main title with decorative elements -->
+  <div class="relative mb-10 mt-4">
+    <!-- Decorative lines -->
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[120%] h-[1px] bg-gradient-to-r from-transparent via-gold/30 to-transparent"></div>
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rotate-90 w-[40px] h-[1px] bg-gradient-to-r from-transparent via-gold/30 to-transparent"></div>
+
+    <!-- Title with enhanced styling -->
+    <h1 class="text-4xl md:text-5xl lg:text-6xl font-cinzel text-light-gold text-center mb-2 tracking-wider relative z-10 text-shadow-lg">
+      <span class="inline-block transform hover:scale-105 transition-transform duration-500">✧</span>
+      <span class="bg-gradient-to-r from-gold/90 via-light-gold to-gold/90 text-transparent bg-clip-text">Mystical Tarot Reading</span>
+      <span class="inline-block transform hover:scale-105 transition-transform duration-500">✧</span>
+    </h1>
+
+    <!-- Subtle subtitle -->
+    <p class="text-center text-gold/70 italic mb-4">Discover your destiny through the ancient wisdom of tarot</p>
   </div>
 
-  <button id="drawTenBtn" class="primary-button">
-    <i class="fas fa-magic mr-2"></i> Reveal Your Destiny
-  </button>
-
-  <div id="loadingIndicator" class="loading-spinner hidden"></div>
-
-  <div class="text-center mb-6">
-    <h2 class="text-3xl font-cinzel font-semibold mb-3 text-light-gold">Celtic Cross Spread</h2>
-    <p class="text-lg max-w-2xl mx-auto leading-relaxed">The Celtic Cross is a classic 10-card tarot spread that provides insight into your past, present, and future. The first 6 cards form the cross, while the last 4 cards on the right form the staff, drawn from bottom to top (positions 7-10).</p>
-  </div>
-
-  <div class="reading-container">
-    <div id="tenCardDisplay" class="ten-card-display">
-      <!-- Cards will be positioned absolutely within this container -->
-      <!-- Add a visual indicator for the staff drawing direction -->
-      <div class="staff-indicator">
-        <div class="absolute w-full h-full flex flex-col items-center">
-          <div class="w-[2px] h-[180px] bg-gold/50"></div>
-          <div class="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[12px] border-b-gold/50 transform rotate-180"></div>
-        </div>
-      </div>
+  <!-- Deck container with enhanced styling -->
+  <div class="relative mb-10">
+    <div id="deckContainer" class="relative w-32 h-48 md:w-36 md:h-56 mb-4 animate-float">
+      <!-- Deck cards will be added here by JavaScript -->
     </div>
 
-    <!-- Card detail panel -->
-    <div id="cardDetailPanel" class="card-detail-panel hidden">
-      <div class="card-detail-header">
-        <h3 id="detailCardName" class="detail-card-name">Select a card</h3>
-        <button id="closeDetailBtn" class="close-detail-btn" aria-label="Close details">
+    <!-- Decorative glow effect under the deck -->
+    <div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-24 h-2 bg-gold/10 filter blur-md rounded-full"></div>
+  </div>
+
+  <!-- Draw button with enhanced styling -->
+  <button id="drawTenBtn" class="px-8 py-4 bg-gradient-to-br from-mystic-purple via-deep-purple to-midnight-blue text-light-gold rounded-xl shadow-xl hover:shadow-gold-glow transition-all duration-500 font-cinzel text-xl mb-10 flex items-center justify-center relative overflow-hidden group">
+    <!-- Animated background effect -->
+    <div class="absolute inset-0 bg-gradient-to-r from-gold/10 to-gold/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+    <!-- Decorative elements -->
+    <div class="absolute top-0 left-0 w-4 h-4 border-t border-l border-gold/40 rounded-tl-md"></div>
+    <div class="absolute top-0 right-0 w-4 h-4 border-t border-r border-gold/40 rounded-tr-md"></div>
+    <div class="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-gold/40 rounded-bl-md"></div>
+    <div class="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-gold/40 rounded-br-md"></div>
+
+    <!-- Icon with animation -->
+    <div class="mr-3 relative">
+      <i class="fas fa-magic text-gold group-hover:text-light-gold transition-colors duration-300"></i>
+      <span class="absolute -top-1 -right-1 w-2 h-2 bg-gold/50 rounded-full opacity-0 group-hover:opacity-100 animate-pulse"></span>
+    </div>
+
+    <!-- Text with subtle animation -->
+    <span class="relative z-10 group-hover:tracking-wider transition-all duration-300">Reveal Your Destiny</span>
+  </button>
+
+  <!-- Enhanced loading indicator -->
+  <div id="loadingIndicator" class="hidden mb-10 relative">
+    <div class="w-16 h-16 border-4 border-gold/20 border-t-gold rounded-full animate-spin-slow"></div>
+    <div class="absolute inset-0 flex items-center justify-center">
+      <div class="w-2 h-2 bg-gold/50 rounded-full"></div>
+    </div>
+    <p class="text-gold/70 text-sm mt-2 animate-pulse">Reading the cards...</p>
+  </div>
+
+  <!-- Celtic Cross description with enhanced styling -->
+  <div class="text-center mb-12 max-w-4xl mx-auto px-4 relative">
+    <!-- Decorative elements -->
+    <div class="absolute top-0 left-0 w-8 h-8 border-t border-l border-gold/20 -m-2"></div>
+    <div class="absolute top-0 right-0 w-8 h-8 border-t border-r border-gold/20 -m-2"></div>
+    <div class="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-gold/20 -m-2"></div>
+    <div class="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-gold/20 -m-2"></div>
+
+    <h2 class="text-2xl md:text-3xl font-cinzel font-semibold mb-4 text-light-gold">Celtic Cross Spread</h2>
+    <p class="text-base md:text-lg max-w-2xl mx-auto leading-relaxed">The Celtic Cross is a classic 10-card tarot spread that provides insight into your past, present, and future. The first 6 cards form the cross, while the last 4 cards on the right form the staff, drawn from bottom to top (positions 7-10).</p>
+  </div>
+
+  <div class="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 mb-12">
+    <!-- Card display area with enhanced styling -->
+    <div id="tenCardDisplay" class="relative w-full max-w-5xl h-[700px] md:h-[800px] lg:h-[900px] mx-auto flex-1 bg-gradient-to-b from-mystic-purple/5 to-midnight-blue/5 rounded-xl border border-gold/20 shadow-xl overflow-hidden pb-24">
+      <!-- Decorative corner elements -->
+      <div class="absolute top-3 left-3 w-12 h-12 border-t border-l border-gold/30 rounded-tl-lg pointer-events-none"></div>
+      <div class="absolute top-3 right-3 w-12 h-12 border-t border-r border-gold/30 rounded-tr-lg pointer-events-none"></div>
+      <div class="absolute bottom-3 left-3 w-12 h-12 border-b border-l border-gold/30 rounded-bl-lg pointer-events-none"></div>
+      <div class="absolute bottom-3 right-3 w-12 h-12 border-b border-r border-gold/30 rounded-br-lg pointer-events-none"></div>
+
+      <!-- Mystical symbols in the background -->
+      <div class="absolute top-1/4 left-1/4 text-gold/5 text-6xl transform -rotate-12 pointer-events-none">☽</div>
+      <div class="absolute bottom-1/4 right-1/4 text-gold/5 text-6xl transform rotate-12 pointer-events-none">☀</div>
+      <div class="absolute top-3/4 left-1/3 text-gold/5 text-5xl transform rotate-45 pointer-events-none">✧</div>
+      <div class="absolute top-1/3 right-1/3 text-gold/5 text-5xl transform -rotate-45 pointer-events-none">⚝</div>
+
+      <!-- Visual indicator for the staff drawing direction with enhanced styling -->
+      <div class="absolute right-[15%] top-1/2 transform -translate-y-1/2 h-[60%] flex flex-col items-center opacity-40 pointer-events-none">
+        <div class="w-[2px] h-full bg-gradient-to-b from-gold/30 via-gold/50 to-gold/30"></div>
+        <div class="w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[12px] border-b-gold/50 transform rotate-180 -mt-1 animate-pulse-slow"></div>
+      </div>
+
+      <!-- Enhanced grid overlay for better visual alignment -->
+      <div class="absolute inset-0 opacity-5 pointer-events-none"
+           style="background-image: linear-gradient(rgba(212, 175, 55, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(212, 175, 55, 0.1) 1px, transparent 1px); background-size: 5% 5%;">
+      </div>
+
+      <!-- Subtle glow effect in the center -->
+      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-gold/5 filter blur-xl pointer-events-none"></div>
+    </div>
+
+    <!-- Card detail panel with enhanced styling -->
+    <div id="cardDetailPanel" class="hidden lg:w-[450px] w-full max-w-xl mx-auto lg:mx-0 bg-gradient-to-b from-deep-purple/90 to-midnight-blue/90 backdrop-blur-md rounded-xl border border-gold/30 shadow-2xl overflow-hidden flex flex-col h-[700px] lg:h-[900px] transition-all duration-500 ease-in-out transform scale-100 opacity-100">
+      <!-- Header with decorative elements -->
+      <div class="relative flex justify-between items-center p-5 border-b border-gold/30 bg-gradient-to-r from-mystic-purple/40 via-deep-purple/20 to-mystic-purple/40">
+        <!-- Decorative stars in header -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden opacity-30 pointer-events-none">
+          <div class="absolute top-1 left-2 w-1 h-1 bg-gold rounded-full animate-pulse"></div>
+          <div class="absolute top-3 right-4 w-1.5 h-1.5 bg-light-gold rounded-full animate-pulse" style="animation-delay: 0.5s"></div>
+          <div class="absolute bottom-2 left-1/4 w-1 h-1 bg-gold rounded-full animate-pulse" style="animation-delay: 1s"></div>
+        </div>
+
+        <h3 id="detailCardName" class="font-cinzel text-xl text-light-gold truncate pr-4 relative">
+          <span class="relative z-10">Select a card</span>
+          <!-- Decorative underline -->
+          <span class="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-gold/50 to-transparent"></span>
+        </h3>
+
+        <button id="closeDetailBtn" class="relative z-10 w-8 h-8 rounded-full bg-mystic-purple/50 text-gold hover:text-light-gold hover:bg-mystic-purple/70 transition-all duration-300 flex items-center justify-center" aria-label="Close details">
           <i class="fas fa-times"></i>
         </button>
       </div>
-      <div class="card-detail-image-container">
-        <img id="detailCardImage" src="" alt="" class="detail-card-image">
+
+      <!-- Card image with enhanced container -->
+      <div class="relative flex justify-center items-center p-6 bg-gradient-to-b from-mystic-purple/30 to-deep-purple/30">
+        <!-- Decorative frame around the card -->
+        <div class="absolute inset-0 m-4 border border-gold/10 rounded-lg pointer-events-none"></div>
+
+        <!-- Decorative corner elements -->
+        <div class="absolute top-2 left-2 w-6 h-6 border-t border-l border-gold/30 rounded-tl-md pointer-events-none"></div>
+        <div class="absolute top-2 right-2 w-6 h-6 border-t border-r border-gold/30 rounded-tr-md pointer-events-none"></div>
+        <div class="absolute bottom-2 left-2 w-6 h-6 border-b border-l border-gold/30 rounded-bl-md pointer-events-none"></div>
+        <div class="absolute bottom-2 right-2 w-6 h-6 border-b border-r border-gold/30 rounded-br-md pointer-events-none"></div>
+
+        <img id="detailCardImage" src="" alt="" class="max-h-[320px] max-w-full object-contain transition-all duration-700 shadow-lg rounded-md hover:shadow-gold-glow">
       </div>
-      <div class="card-detail-content">
-        <div class="detail-section">
-          <h4 class="detail-section-title">Description</h4>
-          <p id="detailCardDesc" class="detail-text">Select a card to see its description</p>
+
+      <!-- Content sections with improved styling -->
+      <div class="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar bg-gradient-to-b from-midnight-blue/50 to-deep-purple/30">
+        <!-- Keywords Section with enhanced styling -->
+        <div class="border border-gold/20 rounded-lg overflow-hidden shadow-md hover:shadow-gold-glow transition-shadow duration-300">
+          <!-- Section header with icon -->
+          <div class="flex justify-between items-center p-4 bg-gradient-to-r from-mystic-purple/40 via-deep-purple/30 to-mystic-purple/40 cursor-pointer hover:bg-mystic-purple/50 transition-all duration-300 collapsible group">
+            <div class="flex items-center">
+              <i class="fas fa-key text-gold/70 mr-3 group-hover:text-light-gold transition-colors duration-300"></i>
+              <h4 class="font-cinzel text-gold group-hover:text-light-gold transition-colors duration-300">Keywords</h4>
+            </div>
+            <i class="fas fa-chevron-down text-gold/70 group-hover:text-light-gold transition-all duration-300"></i>
+          </div>
+
+          <!-- Section content with improved styling -->
+          <div class="section-content p-5 bg-gradient-to-b from-midnight-blue/40 to-deep-purple/20">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <!-- Upright keywords -->
+              <div class="bg-mystic-purple/10 p-3 rounded-lg border border-gold/10">
+                <h5 class="text-light-gold font-cinzel font-semibold mb-2 flex items-center">
+                  <i class="fas fa-sun text-gold/70 mr-2 text-sm"></i>
+                  Upright
+                </h5>
+                <p id="detailCardKeywordsUpright" class="text-white/90 leading-relaxed">-</p>
+              </div>
+
+              <!-- Reversed keywords -->
+              <div class="bg-mystic-purple/10 p-3 rounded-lg border border-gold/10">
+                <h5 class="text-light-gold font-cinzel font-semibold mb-2 flex items-center">
+                  <i class="fas fa-moon text-gold/70 mr-2 text-sm"></i>
+                  Reversed
+                </h5>
+                <p id="detailCardKeywordsReversed" class="text-white/90 leading-relaxed">-</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="detail-section">
-          <h4 class="detail-section-title">Meaning</h4>
-          <p id="detailCardMeaning" class="detail-text">Select a card to see its meaning</p>
+
+        <!-- Quotes Section with enhanced styling -->
+        <div class="border border-gold/20 rounded-lg overflow-hidden shadow-md hover:shadow-gold-glow transition-shadow duration-300">
+          <!-- Section header with icon -->
+          <div class="flex justify-between items-center p-4 bg-gradient-to-r from-mystic-purple/40 via-deep-purple/30 to-mystic-purple/40 cursor-pointer hover:bg-mystic-purple/50 transition-all duration-300 collapsible group">
+            <div class="flex items-center">
+              <i class="fas fa-quote-left text-gold/70 mr-3 group-hover:text-light-gold transition-colors duration-300"></i>
+              <h4 class="font-cinzel text-gold group-hover:text-light-gold transition-colors duration-300">Quotes</h4>
+            </div>
+            <i class="fas fa-chevron-down text-gold/70 group-hover:text-light-gold transition-all duration-300"></i>
+          </div>
+
+          <!-- Section content with improved styling -->
+          <div class="section-content p-5 bg-gradient-to-b from-midnight-blue/40 to-deep-purple/20">
+            <div id="detailCardQuotes" class="space-y-4">
+              <!-- Quotes will be inserted here with enhanced styling via JavaScript -->
+              <!-- We'll style these with decorative quote marks and better formatting -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Description Section with enhanced styling -->
+        <div class="border border-gold/20 rounded-lg overflow-hidden shadow-md hover:shadow-gold-glow transition-shadow duration-300">
+          <!-- Section header with icon -->
+          <div class="flex justify-between items-center p-4 bg-gradient-to-r from-mystic-purple/40 via-deep-purple/30 to-mystic-purple/40 cursor-pointer hover:bg-mystic-purple/50 transition-all duration-300 collapsible group">
+            <div class="flex items-center">
+              <i class="fas fa-book-open text-gold/70 mr-3 group-hover:text-light-gold transition-colors duration-300"></i>
+              <h4 class="font-cinzel text-gold group-hover:text-light-gold transition-colors duration-300">Description</h4>
+            </div>
+            <i class="fas fa-chevron-down text-gold/70 group-hover:text-light-gold transition-all duration-300"></i>
+          </div>
+
+          <!-- Section content with improved styling -->
+          <div class="section-content p-5 bg-gradient-to-b from-midnight-blue/40 to-deep-purple/20">
+            <!-- Decorative elements -->
+            <div class="relative">
+              <!-- Top left decorative element -->
+              <div class="absolute -top-1 -left-1 w-3 h-3 border-t border-l border-gold/20"></div>
+              <!-- Bottom right decorative element -->
+              <div class="absolute -bottom-1 -right-1 w-3 h-3 border-b border-r border-gold/20"></div>
+
+              <p id="detailCardDesc" class="text-white/90 leading-relaxed p-2">Select a card to see its description</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Meanings Section with enhanced styling -->
+        <div class="border border-gold/20 rounded-lg overflow-hidden shadow-md hover:shadow-gold-glow transition-shadow duration-300">
+          <!-- Section header with icon -->
+          <div class="flex justify-between items-center p-4 bg-gradient-to-r from-mystic-purple/40 via-deep-purple/30 to-mystic-purple/40 cursor-pointer hover:bg-mystic-purple/50 transition-all duration-300 collapsible group">
+            <div class="flex items-center">
+              <i class="fas fa-star text-gold/70 mr-3 group-hover:text-light-gold transition-colors duration-300"></i>
+              <h4 class="font-cinzel text-gold group-hover:text-light-gold transition-colors duration-300">Meanings</h4>
+            </div>
+            <i class="fas fa-chevron-down text-gold/70 group-hover:text-light-gold transition-all duration-300"></i>
+          </div>
+
+          <!-- Section content with improved styling -->
+          <div class="section-content bg-gradient-to-b from-midnight-blue/40 to-deep-purple/20">
+            <!-- Improved tab navigation -->
+            <div class="flex flex-wrap border-b border-gold/30 bg-midnight-blue/50 px-1">
+              <button class="meaning-tab active px-4 py-3 text-sm font-medium font-cinzel transition-all duration-300 hover:text-light-gold flex items-center" data-tab="general">
+                <i class="fas fa-globe-americas text-xs mr-2"></i>General
+              </button>
+              <button class="meaning-tab px-4 py-3 text-sm font-medium font-cinzel transition-all duration-300 hover:text-light-gold flex items-center" data-tab="career">
+                <i class="fas fa-briefcase text-xs mr-2"></i>Career
+              </button>
+              <button class="meaning-tab px-4 py-3 text-sm font-medium font-cinzel transition-all duration-300 hover:text-light-gold flex items-center" data-tab="relationships">
+                <i class="fas fa-heart text-xs mr-2"></i>Love
+              </button>
+              <button class="meaning-tab px-4 py-3 text-sm font-medium font-cinzel transition-all duration-300 hover:text-light-gold flex items-center" data-tab="spirituality">
+                <i class="fas fa-pray text-xs mr-2"></i>Spirit
+              </button>
+              <button class="meaning-tab px-4 py-3 text-sm font-medium font-cinzel transition-all duration-300 hover:text-light-gold flex items-center" data-tab="health">
+                <i class="fas fa-heartbeat text-xs mr-2"></i>Health
+              </button>
+            </div>
+
+            <!-- Tab content with improved styling -->
+            <div class="p-5">
+              <!-- General meaning -->
+              <div id="meaningGeneral" class="meaning-content active">
+                <div class="relative">
+                  <div class="absolute -top-1 -left-1 w-3 h-3 border-t border-l border-gold/20"></div>
+                  <div class="absolute -bottom-1 -right-1 w-3 h-3 border-b border-r border-gold/20"></div>
+                  <p id="detailCardMeaningGeneral" class="text-white/90 leading-relaxed p-2">-</p>
+                </div>
+              </div>
+
+              <!-- Career meaning -->
+              <div id="meaningCareer" class="meaning-content hidden">
+                <div class="relative">
+                  <div class="absolute -top-1 -left-1 w-3 h-3 border-t border-l border-gold/20"></div>
+                  <div class="absolute -bottom-1 -right-1 w-3 h-3 border-b border-r border-gold/20"></div>
+                  <p id="detailCardMeaningCareer" class="text-white/90 leading-relaxed p-2">-</p>
+                </div>
+              </div>
+
+              <!-- Relationships meaning -->
+              <div id="meaningRelationships" class="meaning-content hidden">
+                <div class="relative">
+                  <div class="absolute -top-1 -left-1 w-3 h-3 border-t border-l border-gold/20"></div>
+                  <div class="absolute -bottom-1 -right-1 w-3 h-3 border-b border-r border-gold/20"></div>
+                  <p id="detailCardMeaningRelationships" class="text-white/90 leading-relaxed p-2">-</p>
+                </div>
+              </div>
+
+              <!-- Spirituality meaning -->
+              <div id="meaningSpirituality" class="meaning-content hidden">
+                <div class="relative">
+                  <div class="absolute -top-1 -left-1 w-3 h-3 border-t border-l border-gold/20"></div>
+                  <div class="absolute -bottom-1 -right-1 w-3 h-3 border-b border-r border-gold/20"></div>
+                  <p id="detailCardMeaningSpirituality" class="text-white/90 leading-relaxed p-2">-</p>
+                </div>
+              </div>
+
+              <!-- Health meaning -->
+              <div id="meaningHealth" class="meaning-content hidden">
+                <div class="relative">
+                  <div class="absolute -top-1 -left-1 w-3 h-3 border-t border-l border-gold/20"></div>
+                  <div class="absolute -bottom-1 -right-1 w-3 h-3 border-b border-r border-gold/20"></div>
+                  <p id="detailCardMeaningHealth" class="text-white/90 leading-relaxed p-2">-</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Journaling Prompts Section with enhanced styling -->
+        <div class="border border-gold/20 rounded-lg overflow-hidden shadow-md hover:shadow-gold-glow transition-shadow duration-300">
+          <!-- Section header with icon -->
+          <div class="flex justify-between items-center p-4 bg-gradient-to-r from-mystic-purple/40 via-deep-purple/30 to-mystic-purple/40 cursor-pointer hover:bg-mystic-purple/50 transition-all duration-300 collapsible group">
+            <div class="flex items-center">
+              <i class="fas fa-feather-alt text-gold/70 mr-3 group-hover:text-light-gold transition-colors duration-300"></i>
+              <h4 class="font-cinzel text-gold group-hover:text-light-gold transition-colors duration-300">Journaling Prompts</h4>
+            </div>
+            <i class="fas fa-chevron-down text-gold/70 group-hover:text-light-gold transition-all duration-300"></i>
+          </div>
+
+          <!-- Section content with improved styling -->
+          <div class="section-content p-5 bg-gradient-to-b from-midnight-blue/40 to-deep-purple/20">
+            <!-- Decorative journal paper background -->
+            <div class="relative bg-midnight-blue/20 p-4 rounded-lg border border-gold/10">
+              <!-- Decorative journal lines -->
+              <div class="absolute left-0 top-0 bottom-0 w-0.5 border-l border-dashed border-gold/10 ml-8"></div>
+
+              <ul id="detailCardPrompts" class="space-y-4 text-white/90 relative z-10">
+                <!-- Prompts will be inserted here with enhanced styling via JavaScript -->
+                <!-- We'll style these with decorative elements -->
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suggested Combinations Section with enhanced styling -->
+        <div class="border border-gold/20 rounded-lg overflow-hidden shadow-md hover:shadow-gold-glow transition-shadow duration-300">
+          <!-- Section header with icon -->
+          <div class="flex justify-between items-center p-4 bg-gradient-to-r from-mystic-purple/40 via-deep-purple/30 to-mystic-purple/40 cursor-pointer hover:bg-mystic-purple/50 transition-all duration-300 collapsible group">
+            <div class="flex items-center">
+              <i class="fas fa-link text-gold/70 mr-3 group-hover:text-light-gold transition-colors duration-300"></i>
+              <h4 class="font-cinzel text-gold group-hover:text-light-gold transition-colors duration-300">Suggested Combinations</h4>
+            </div>
+            <i class="fas fa-chevron-down text-gold/70 group-hover:text-light-gold transition-all duration-300"></i>
+          </div>
+
+          <!-- Section content with improved styling -->
+          <div class="section-content p-5 bg-gradient-to-b from-midnight-blue/40 to-deep-purple/20">
+            <!-- Decorative connecting lines background -->
+            <div class="relative">
+              <!-- Decorative elements -->
+              <div class="absolute top-0 right-0 w-16 h-16 border-t border-r border-gold/5 rounded-tr-lg"></div>
+              <div class="absolute bottom-0 left-0 w-16 h-16 border-b border-l border-gold/5 rounded-bl-lg"></div>
+
+              <div id="detailCardCombinations" class="space-y-4 relative z-10">
+                <!-- Combinations will be inserted here with enhanced styling via JavaScript -->
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="button-container">
-    <button id="resetBtn" class="reset-button hidden">
-      <i class="fas fa-redo mr-2"></i> New Reading
+  <div class="flex justify-center mb-12 mt-8">
+    <button id="resetBtn" class="hidden px-8 py-4 bg-gradient-to-br from-mystic-purple via-deep-purple to-midnight-blue text-light-gold rounded-xl shadow-xl hover:shadow-gold-glow transition-all duration-500 font-cinzel text-xl flex items-center justify-center relative overflow-hidden group">
+      <!-- Animated background effect -->
+      <div class="absolute inset-0 bg-gradient-to-r from-gold/10 to-gold/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+      <!-- Decorative elements -->
+      <div class="absolute top-0 left-0 w-4 h-4 border-t border-l border-gold/40 rounded-tl-md"></div>
+      <div class="absolute top-0 right-0 w-4 h-4 border-t border-r border-gold/40 rounded-tr-md"></div>
+      <div class="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-gold/40 rounded-bl-md"></div>
+      <div class="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-gold/40 rounded-br-md"></div>
+
+      <!-- Icon with animation -->
+      <div class="mr-3 relative">
+        <i class="fas fa-magic text-gold group-hover:text-light-gold transition-colors duration-300"></i>
+        <span class="absolute -top-1 -right-1 w-2 h-2 bg-gold/50 rounded-full opacity-0 group-hover:opacity-100 animate-pulse"></span>
+      </div>
+
+      <!-- Text with subtle animation -->
+      <span class="relative z-10 group-hover:tracking-wider transition-all duration-300">New Reading</span>
     </button>
   </div>
 
-  <footer class="site-footer">
-    <div class="footer-content">
-      <p>Tarot Reading Experience</p>
+  <footer class="w-full py-8 border-t border-gold/20 mt-auto relative">
+    <!-- Decorative elements -->
+    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold/10 to-transparent"></div>
+    <div class="absolute top-0 left-1/4 w-1 h-1 rounded-full bg-gold/30 animate-pulse"></div>
+    <div class="absolute top-0 right-1/4 w-1 h-1 rounded-full bg-gold/30 animate-pulse" style="animation-delay: 1s"></div>
+
+    <div class="max-w-4xl mx-auto text-center px-4">
+      <div class="flex items-center justify-center mb-3">
+        <div class="h-[1px] w-16 bg-gradient-to-r from-transparent to-gold/30"></div>
+        <div class="mx-4 text-gold/80 text-xl">✧</div>
+        <div class="h-[1px] w-16 bg-gradient-to-l from-transparent to-gold/30"></div>
+      </div>
+
+      <p class="text-gold/70 font-cinzel tracking-wider mb-2">Mystical Tarot Reading Experience</p>
+      <p class="text-gold/50 text-sm italic">Unveil the mysteries of your past, present, and future</p>
     </div>
   </footer>
+
+  <!-- Add custom styles -->
+  <style>
+    /* Text shadow utility class */
+    .text-shadow-lg {
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5), 0 0 10px rgba(212, 175, 55, 0.3);
+    }
+
+    /* Custom scrollbar for webkit browsers */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.3);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(212, 175, 55, 0.3);
+      border-radius: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(212, 175, 55, 0.5);
+    }
+
+    /* For Firefox */
+    .custom-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(212, 175, 55, 0.3) rgba(15, 23, 42, 0.3);
+    }
+
+    /* Active tab styling */
+    .meaning-tab.active {
+      color: var(--light-gold);
+      border-bottom: 2px solid var(--gold);
+    }
+
+    /* 3D transform styles */
+    .transform-style-preserve-3d {
+      transform-style: preserve-3d;
+    }
+
+    .backface-hidden {
+      backface-visibility: hidden;
+    }
+
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+
+    /* Card flipping */
+    .card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    /* Make sure the card container has proper 3D perspective */
+    .tarot-position {
+      perspective: 1000px;
+    }
+
+    /* Card detail panel animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(10px); }
+    }
+
+    #cardDetailPanel {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    #cardDetailPanel.fade-out {
+      animation: fadeOut 0.3s ease-in forwards;
+    }
+
+    /* Card entrance animation */
+    .card-enter {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+
+    .card-enter-active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Reversed card styling */
+    .reversed {
+      transform: rotate(180deg);
+    }
+
+    /* Challenge card styling (crossing card) */
+    .challenge-card {
+      transform: rotate(90deg);
+    }
+
+    .reversed-challenge {
+      transform: rotate(270deg);
+    }
+
+    /* Card glow effect when flipped */
+    .flipped::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      right: -8px;
+      bottom: -8px;
+      border-radius: 0.9rem;
+      background: linear-gradient(45deg, var(--gold), #6366f1, #8b5cf6, var(--gold));
+      background-size: 400% 400%;
+      z-index: -1;
+      filter: blur(12px);
+      opacity: 0.7;
+      animation: glowing 3s ease-in-out infinite;
+    }
+
+    @keyframes glowing {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Star animation */
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 4s ease-in-out infinite;
+    }
+  </style>
 
   <script src="card-flip.js"></script>
   <script src="script.js"></script>

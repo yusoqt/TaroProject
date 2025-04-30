@@ -7,7 +7,6 @@
 let tarotData = [];
 let isDrawing = false;
 let soundEnabled = true;
-let isDarkTheme = true;
 
 // DOM element cache for frequently accessed elements
 const domElements = {};
@@ -16,19 +15,20 @@ const domElements = {};
 let playCardFlipSound = window.createCardFlipSound ? window.createCardFlipSound() : null;
 
 // Define the positions for the 10-card Celtic Cross spread
-// Further optimized Celtic Cross layout with improved spacing on both X and Y axes
+// Optimized Celtic Cross layout with improved spacing on both X and Y axes
 // Enhanced visual separation between cards for better readability
+// Adjusted to be less tall at the top and more space at the bottom
 const spreadPositions = [
-  { top: '40%', left: '32%', zIndex: 10, label: '1. Present' },           // Center/Present - adjusted for better balance
-  { top: '40%', left: '32%', rotate: '90deg', zIndex: 11, label: '2. Challenge', isChallenge: true, offsetY: '0px' },  // Crossing card - positioned on top of Present card
-  { top: '85%', left: '32%', zIndex: 3, label: '3. Foundation' },        // Below - further increased vertical spacing
-  { top: '-5%', left: '32%', zIndex: 3, label: '4. Crown' },             // Above - further increased vertical spacing
-  { top: '40%', left: '2%', zIndex: 3, label: '5. Past' },               // Left - further increased horizontal spacing
-  { top: '40%', left: '62%', zIndex: 3, label: '6. Future' },            // Right - adjusted horizontal spacing
-  { top: '95%', left: '88%', zIndex: 4, label: '7. Advice' },            // Bottom of staff - further increased spacing
-  { top: '65%', left: '88%', zIndex: 5, label: '8. External' },          // Second from bottom - adjusted vertical spacing
-  { top: '35%', left: '88%', zIndex: 6, label: '9. Hopes/Fears' },       // Third from bottom - adjusted vertical spacing
-  { top: '5%', left: '88%', zIndex: 7, label: '10. Outcome' }            // Top of staff - adjusted vertical spacing
+  { top: '38%', left: '35%', zIndex: 10, label: '1. Present' },           // Center/Present - adjusted for better balance
+  { top: '38%', left: '35%', rotate: '90deg', zIndex: 11, label: '2. Challenge', isChallenge: true, offsetY: '0px' },  // Crossing card - positioned on top of Present card
+  { top: '65%', left: '35%', zIndex: 3, label: '3. Foundation' },        // Below - better vertical spacing
+  { top: '12%', left: '35%', zIndex: 3, label: '4. Crown' },             // Above - better vertical spacing (moved down slightly)
+  { top: '38%', left: '15%', zIndex: 3, label: '5. Past' },              // Left - better horizontal spacing
+  { top: '38%', left: '55%', zIndex: 3, label: '6. Future' },            // Right - better horizontal spacing
+  { top: '70%', left: '75%', zIndex: 4, label: '7. Advice' },            // Bottom of staff - moved up and left to stay within boundaries
+  { top: '55%', left: '75%', zIndex: 5, label: '8. External' },          // Second from bottom - better vertical spacing
+  { top: '38%', left: '75%', zIndex: 6, label: '9. Hopes/Fears' },       // Third from bottom - better vertical spacing
+  { top: '20%', left: '75%', zIndex: 7, label: '10. Outcome' }           // Top of staff - better vertical spacing
 ];
 
 // Create deck visualization
@@ -88,7 +88,6 @@ function initializeApp() {
 function cacheElements() {
   // UI controls
   domElements.soundButton = document.getElementById('soundToggle');
-  domElements.themeButton = document.getElementById('themeToggle');
   domElements.drawButton = document.getElementById('drawTenBtn');
   domElements.resetButton = document.getElementById('resetBtn');
   domElements.closeDetailBtn = document.getElementById('closeDetailBtn');
@@ -101,7 +100,21 @@ function cacheElements() {
   domElements.cardName = document.getElementById('detailCardName');
   domElements.cardImage = document.getElementById('detailCardImage');
   domElements.cardDesc = document.getElementById('detailCardDesc');
-  domElements.cardMeaning = document.getElementById('detailCardMeaning');
+
+  // New detail panel elements
+  domElements.keywordsUpright = document.getElementById('detailCardKeywordsUpright');
+  domElements.keywordsReversed = document.getElementById('detailCardKeywordsReversed');
+  domElements.quotesContainer = document.getElementById('detailCardQuotes');
+  domElements.meaningGeneral = document.getElementById('detailCardMeaningGeneral');
+  domElements.meaningCareer = document.getElementById('detailCardMeaningCareer');
+  domElements.meaningRelationships = document.getElementById('detailCardMeaningRelationships');
+  domElements.meaningSpirituality = document.getElementById('detailCardMeaningSpirituality');
+  domElements.meaningHealth = document.getElementById('detailCardMeaningHealth');
+  domElements.promptsList = document.getElementById('detailCardPrompts');
+  domElements.combinationsContainer = document.getElementById('detailCardCombinations');
+
+  // For backward compatibility
+  domElements.cardMeaning = document.getElementById('detailCardMeaningGeneral');
 
   // Background elements
   domElements.starsContainer = document.getElementById('starsContainer');
@@ -165,23 +178,7 @@ function toggleSound() {
   }
 }
 
-/**
- * Toggle between dark and light theme
- */
-function toggleTheme() {
-  isDarkTheme = !isDarkTheme;
-  document.body.classList.toggle('light-theme');
 
-  if (domElements.themeButton) {
-    domElements.themeButton.innerHTML = isDarkTheme ?
-      '<i class="fas fa-moon"></i>' :
-      '<i class="fas fa-sun"></i>';
-
-    // Add aria-label for accessibility
-    domElements.themeButton.setAttribute('aria-label',
-      isDarkTheme ? 'Switch to light theme' : 'Switch to dark theme');
-  }
-}
 
 /**
  * Reset the reading to initial state
@@ -208,6 +205,11 @@ function resetReading() {
     domElements.detailPanel.classList.add('hidden');
   }
 
+  // Remove selected state from all cards
+  document.querySelectorAll('.tarot-position').forEach(card => {
+    card.classList.remove('card-selected');
+  });
+
   // Reset drawing state and recreate the deck
   isDrawing = false;
   createDeck();
@@ -217,11 +219,11 @@ function resetReading() {
  * Show card details in the side panel
  * @param {Object} card - The tarot card object
  * @param {boolean} isReversed - Whether the card is reversed
- * @param {string} meaning - The card meaning (upright or reversed)
+ * @param {string} meaning - The card meaning (upright or reversed) - kept for backward compatibility but not used
  * @param {string} imageSrc - Path to the card image
  * @param {string} positionLabel - The position label in the spread
  */
-function showCardDetails(card, isReversed, meaning, imageSrc, positionLabel) {
+function showCardDetails(card, isReversed, _meaning, imageSrc, positionLabel) {
   if (!domElements.detailPanel) return;
 
   // Update the panel content
@@ -242,19 +244,239 @@ function showCardDetails(card, isReversed, meaning, imageSrc, positionLabel) {
     };
   }
 
+  // Update keywords
+  const keywordsUpright = document.getElementById('detailCardKeywordsUpright');
+  const keywordsReversed = document.getElementById('detailCardKeywordsReversed');
+
+  if (keywordsUpright) {
+    keywordsUpright.textContent = card.keywords.upright || '-';
+  }
+
+  if (keywordsReversed) {
+    keywordsReversed.textContent = card.keywords.reversed || '-';
+  }
+
+  // Update quotes with enhanced styling
+  const quotesContainer = document.getElementById('detailCardQuotes');
+  if (quotesContainer && card.quotes) {
+    quotesContainer.innerHTML = '';
+    card.quotes.forEach(quote => {
+      // Extract author if available (text after the last dash)
+      let quoteText = quote;
+      let author = '';
+
+      const lastDashIndex = quote.lastIndexOf('–');
+      if (lastDashIndex !== -1) {
+        quoteText = quote.substring(0, lastDashIndex).trim();
+        author = quote.substring(lastDashIndex + 1).trim();
+      }
+
+      // Create quote container with decorative elements
+      const quoteElement = document.createElement('div');
+      quoteElement.className = 'bg-mystic-purple/10 p-4 rounded-lg border border-gold/10 relative mb-4';
+
+      // Add decorative quote marks
+      const leftQuote = document.createElement('div');
+      leftQuote.className = 'absolute -top-2 -left-2 text-gold/30 text-3xl';
+      leftQuote.innerHTML = '<i class="fas fa-quote-left"></i>';
+
+      const rightQuote = document.createElement('div');
+      rightQuote.className = 'absolute -bottom-2 -right-2 text-gold/30 text-3xl';
+      rightQuote.innerHTML = '<i class="fas fa-quote-right"></i>';
+
+      quoteElement.appendChild(leftQuote);
+      quoteElement.appendChild(rightQuote);
+
+      // Add quote text
+      const quoteTextElement = document.createElement('p');
+      quoteTextElement.className = 'text-white/90 italic text-center px-6 py-2';
+      quoteTextElement.textContent = `"${quoteText}"`;
+      quoteElement.appendChild(quoteTextElement);
+
+      // Add author if available
+      if (author) {
+        const authorElement = document.createElement('p');
+        authorElement.className = 'text-gold/70 text-right text-sm mt-2';
+        authorElement.textContent = `— ${author}`;
+        quoteElement.appendChild(authorElement);
+      }
+
+      quotesContainer.appendChild(quoteElement);
+    });
+  } else if (quotesContainer) {
+    quotesContainer.innerHTML = '<p class="text-white/70 italic text-center">No quotes available for this card.</p>';
+  }
+
+  // Update description
   if (domElements.cardDesc) {
     domElements.cardDesc.textContent = card.description || 'No description available';
   }
 
-  if (domElements.cardMeaning) {
-    // Show the meaning with keywords
-    const keywords = isReversed ? card.keywords.reversed : card.keywords.upright;
-    domElements.cardMeaning.textContent = `${keywords}: ${meaning || 'No meaning available'}`;
+  // Update meanings
+  const meaningPrefix = isReversed ? 'reversed_meanings' : 'upright_meanings';
+
+  // General meaning
+  const meaningGeneral = document.getElementById('detailCardMeaningGeneral');
+  if (meaningGeneral) {
+    meaningGeneral.textContent = card[meaningPrefix].general || 'No general meaning available';
+  }
+
+  // Career meaning
+  const meaningCareer = document.getElementById('detailCardMeaningCareer');
+  if (meaningCareer) {
+    meaningCareer.textContent = card[meaningPrefix].career_work_finances || 'No career meaning available';
+  }
+
+  // Relationships meaning
+  const meaningRelationships = document.getElementById('detailCardMeaningRelationships');
+  if (meaningRelationships) {
+    meaningRelationships.textContent = card[meaningPrefix].relationships_love || 'No relationships meaning available';
+  }
+
+  // Spirituality meaning
+  const meaningSpirituality = document.getElementById('detailCardMeaningSpirituality');
+  if (meaningSpirituality) {
+    meaningSpirituality.textContent = card[meaningPrefix].spirituality || 'No spirituality meaning available';
+  }
+
+  // Health meaning
+  const meaningHealth = document.getElementById('detailCardMeaningHealth');
+  if (meaningHealth) {
+    meaningHealth.textContent = card[meaningPrefix].well_being_health || 'No health meaning available';
+  }
+
+  // Update journaling prompts with enhanced styling
+  const promptsList = document.getElementById('detailCardPrompts');
+  if (promptsList && card.journaling_prompts) {
+    promptsList.innerHTML = '';
+    card.journaling_prompts.forEach((prompt, index) => {
+      // Create prompt item with decorative elements
+      const promptItem = document.createElement('li');
+      promptItem.className = 'flex items-start mb-3 relative';
+
+      // Add decorative bullet point
+      const bulletPoint = document.createElement('div');
+      bulletPoint.className = 'flex-shrink-0 w-6 h-6 rounded-full bg-mystic-purple/30 border border-gold/20 flex items-center justify-center mr-3 mt-0.5';
+      bulletPoint.innerHTML = `<span class="text-gold text-xs">${index + 1}</span>`;
+
+      // Add prompt text with styling
+      const promptText = document.createElement('div');
+      promptText.className = 'flex-1 text-white/90';
+      promptText.textContent = prompt;
+
+      // Add subtle highlight effect on hover
+      promptItem.addEventListener('mouseover', () => {
+        promptItem.classList.add('bg-mystic-purple/10', 'rounded');
+        bulletPoint.classList.add('bg-mystic-purple/50');
+      });
+
+      promptItem.addEventListener('mouseout', () => {
+        promptItem.classList.remove('bg-mystic-purple/10', 'rounded');
+        bulletPoint.classList.remove('bg-mystic-purple/50');
+      });
+
+      promptItem.appendChild(bulletPoint);
+      promptItem.appendChild(promptText);
+      promptsList.appendChild(promptItem);
+    });
+  } else if (promptsList) {
+    promptsList.innerHTML = '<p class="text-white/70 italic text-center">No journaling prompts available for this card.</p>';
+  }
+
+  // Update suggested combinations
+  const combinationsContainer = document.getElementById('detailCardCombinations');
+  if (combinationsContainer) {
+    combinationsContainer.innerHTML = '';
+
+    // Create upright combinations group if available with enhanced styling
+    if (card.upright_suggested_combinations && card.upright_suggested_combinations.length > 0) {
+      const uprightGroup = document.createElement('div');
+      uprightGroup.className = 'mb-5';
+
+      const uprightTitle = document.createElement('h5');
+      uprightTitle.className = 'text-light-gold font-cinzel mb-3 flex items-center';
+      uprightTitle.innerHTML = '<i class="fas fa-sun text-gold/70 mr-2"></i> Upright Combinations';
+      uprightGroup.appendChild(uprightTitle);
+
+      // Create a container for the combinations
+      const combosContainer = document.createElement('div');
+      combosContainer.className = 'space-y-3 pl-2';
+
+      card.upright_suggested_combinations.forEach(combo => {
+        // Create combo item with enhanced styling
+        const comboItem = document.createElement('div');
+        comboItem.className = 'bg-mystic-purple/10 p-3 rounded-lg border border-gold/10 transition-all duration-300 hover:bg-mystic-purple/20';
+
+        // Create card name with pill styling
+        const comboCard = document.createElement('div');
+        comboCard.className = 'inline-block bg-mystic-purple/40 text-light-gold px-2 py-1 rounded-full text-sm mb-2';
+        comboCard.textContent = combo.card;
+
+        // Create meaning with styling
+        const comboMeaning = document.createElement('div');
+        comboMeaning.className = 'text-white/90 text-sm';
+        comboMeaning.textContent = combo.meaning;
+
+        comboItem.appendChild(comboCard);
+        comboItem.appendChild(comboMeaning);
+        combosContainer.appendChild(comboItem);
+      });
+
+      uprightGroup.appendChild(combosContainer);
+      combinationsContainer.appendChild(uprightGroup);
+    }
+
+    // Create reversed combinations group if available with enhanced styling
+    if (card.reversed_suggested_combinations && card.reversed_suggested_combinations.length > 0) {
+      const reversedGroup = document.createElement('div');
+      reversedGroup.className = 'mb-5';
+
+      const reversedTitle = document.createElement('h5');
+      reversedTitle.className = 'text-light-gold font-cinzel mb-3 flex items-center';
+      reversedTitle.innerHTML = '<i class="fas fa-moon text-gold/70 mr-2"></i> Reversed Combinations';
+      reversedGroup.appendChild(reversedTitle);
+
+      // Create a container for the combinations
+      const combosContainer = document.createElement('div');
+      combosContainer.className = 'space-y-3 pl-2';
+
+      card.reversed_suggested_combinations.forEach(combo => {
+        // Create combo item with enhanced styling
+        const comboItem = document.createElement('div');
+        comboItem.className = 'bg-mystic-purple/10 p-3 rounded-lg border border-gold/10 transition-all duration-300 hover:bg-mystic-purple/20';
+
+        // Create card name with pill styling
+        const comboCard = document.createElement('div');
+        comboCard.className = 'inline-block bg-deep-purple/60 text-light-gold px-2 py-1 rounded-full text-sm mb-2';
+        comboCard.textContent = combo.card;
+
+        // Create meaning with styling
+        const comboMeaning = document.createElement('div');
+        comboMeaning.className = 'text-white/90 text-sm';
+        comboMeaning.textContent = combo.meaning;
+
+        comboItem.appendChild(comboCard);
+        comboItem.appendChild(comboMeaning);
+        combosContainer.appendChild(comboItem);
+      });
+
+      reversedGroup.appendChild(combosContainer);
+      combinationsContainer.appendChild(reversedGroup);
+    } else if (combinationsContainer && !card.upright_suggested_combinations && !card.reversed_suggested_combinations) {
+      combinationsContainer.innerHTML = '<p class="text-white/70 italic text-center">No suggested combinations available for this card.</p>';
+    }
   }
 
   // Show the panel with a fade-in effect
   domElements.detailPanel.classList.remove('hidden');
-  domElements.detailPanel.classList.add('fade-in');
+  // Add flex display for proper layout
+  domElements.detailPanel.classList.add('flex', 'flex-col');
+
+  // Initialize collapsible sections
+  initializeCollapsibleSections();
+
+  // Initialize meaning tabs
+  initializeMeaningTabs();
 }
 
 /**
@@ -277,9 +499,17 @@ function closeCardDetails() {
   // Add a fade-out effect before hiding
   domElements.detailPanel.classList.add('fade-out');
 
+  // Remove flex display to prevent layout shift during animation
+  domElements.detailPanel.classList.remove('flex');
+
+  // Remove selected state from all cards
+  document.querySelectorAll('.tarot-position').forEach(card => {
+    card.classList.remove('card-selected');
+  });
+
   // Wait for animation to complete before hiding
   setTimeout(() => {
-    domElements.detailPanel.classList.remove('fade-in', 'fade-out');
+    domElements.detailPanel.classList.remove('fade-out');
     domElements.detailPanel.classList.add('hidden');
   }, 300);
 }
@@ -293,10 +523,7 @@ function initializeEventListeners() {
     domElements.soundButton.addEventListener('click', toggleSound);
   }
 
-  // Theme toggle
-  if (domElements.themeButton) {
-    domElements.themeButton.addEventListener('click', toggleTheme);
-  }
+
 
   // Reset button
   if (domElements.resetButton) {
@@ -321,6 +548,137 @@ function initializeEventListeners() {
 }
 
 /**
+ * Initialize collapsible sections in the card detail panel
+ */
+function initializeCollapsibleSections() {
+  // Target the correct collapsible elements with the class 'collapsible'
+  const sectionHeaders = document.querySelectorAll('.collapsible');
+
+  // First, close all sections initially
+  document.querySelectorAll('.section-content').forEach(content => {
+    content.style.maxHeight = '0';
+    content.style.padding = '0';
+    content.classList.remove('active');
+  });
+
+  sectionHeaders.forEach((header, index) => {
+    // Remove existing event listeners to prevent duplicates
+    const newHeader = header.cloneNode(true);
+    header.parentNode.replaceChild(newHeader, header);
+
+    // Reset the chevron icon initially
+    const chevronIcon = newHeader.querySelector('i.fa-chevron-down');
+    if (chevronIcon) {
+      chevronIcon.style.transform = 'rotate(0deg)';
+    }
+
+    // Remove active class initially
+    newHeader.classList.remove('active');
+
+    // Add click event listener
+    newHeader.addEventListener('click', () => {
+      // Find the chevron icon inside the header
+      const chevronIcon = newHeader.querySelector('i.fa-chevron-down');
+
+      // Get the content section that follows the header
+      const content = newHeader.nextElementSibling;
+
+      // Toggle active class on header
+      newHeader.classList.toggle('active');
+
+      // Rotate chevron icon when active
+      if (chevronIcon) {
+        if (newHeader.classList.contains('active')) {
+          chevronIcon.style.transform = 'rotate(180deg)';
+        } else {
+          chevronIcon.style.transform = 'rotate(0deg)';
+        }
+      }
+
+      // Toggle section content visibility
+      if (content && content.classList.contains('section-content')) {
+        if (newHeader.classList.contains('active')) {
+          // Set padding first so it's included in the scrollHeight calculation
+          content.style.padding = '1rem';
+          // Use a very large max-height value to ensure all content is visible
+          content.style.maxHeight = '9999px';
+          content.classList.add('active');
+        } else {
+          content.style.maxHeight = '0';
+          content.style.padding = '0';
+          content.classList.remove('active');
+        }
+      }
+    });
+
+    // Open first section by default on initial load
+    if (index === 0) {
+      newHeader.classList.add('active');
+      const content = newHeader.nextElementSibling;
+
+      if (content && content.classList.contains('section-content')) {
+        content.classList.add('active');
+        // Use setTimeout to ensure the DOM has updated
+        setTimeout(() => {
+          content.style.padding = '1rem';
+          // Use a very large max-height value to ensure all content is visible
+          content.style.maxHeight = '9999px';
+        }, 10);
+      }
+
+      if (chevronIcon) {
+        chevronIcon.style.transform = 'rotate(180deg)';
+      }
+    }
+  });
+}
+
+/**
+ * Initialize meaning tabs in the card detail panel
+ */
+function initializeMeaningTabs() {
+  const tabs = document.querySelectorAll('.meaning-tab');
+
+  tabs.forEach(tab => {
+    // Remove existing event listeners
+    const newTab = tab.cloneNode(true);
+    tab.parentNode.replaceChild(newTab, tab);
+
+    // Add new event listener
+    newTab.addEventListener('click', () => {
+      // Remove active class from all tabs
+      document.querySelectorAll('.meaning-tab').forEach(t => {
+        t.classList.remove('active');
+        t.classList.remove('text-light-gold');
+        t.classList.remove('border-b-2');
+        t.classList.remove('border-gold');
+      });
+
+      // Add active class to clicked tab
+      newTab.classList.add('active');
+      newTab.classList.add('text-light-gold');
+      newTab.classList.add('border-b-2');
+      newTab.classList.add('border-gold');
+
+      // Hide all content sections
+      document.querySelectorAll('.meaning-content').forEach(content => {
+        content.classList.add('hidden');
+        content.classList.remove('active');
+      });
+
+      // Show content section corresponding to clicked tab
+      const tabName = newTab.getAttribute('data-tab');
+      const contentSection = document.getElementById(`meaning${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+
+      if (contentSection) {
+        contentSection.classList.remove('hidden');
+        contentSection.classList.add('active');
+      }
+    });
+  });
+}
+
+/**
  * Handle keyboard events for accessibility
  * @param {KeyboardEvent} event - The keyboard event
  */
@@ -336,8 +694,11 @@ function handleKeyboardEvents(event) {
  * Handle window resize events
  */
 function handleWindowResize() {
-  // Could implement responsive adjustments here if needed
-  // Currently the CSS handles most of the responsive behavior
+  // Recalculate heights for all active section contents to ensure they display properly
+  document.querySelectorAll('.section-content.active').forEach(content => {
+    // Reset max-height to ensure all content is visible after resize
+    content.style.maxHeight = '9999px';
+  });
 }
 
 /**
@@ -353,7 +714,7 @@ function createStars() {
 
   for (let i = 0; i < numStars; i++) {
     const star = document.createElement('div');
-    star.className = 'star';
+    star.className = 'absolute rounded-full animate-twinkle';
 
     // Random position
     const x = Math.random() * 100;
@@ -381,6 +742,8 @@ function createStars() {
       // Add a few brighter stars
       star.style.backgroundColor = '#FFFFFF';
       star.style.boxShadow = '0 0 3px rgba(255, 255, 255, 0.8)';
+    } else {
+      star.style.backgroundColor = '#FFFFFF';
     }
 
     fragment.appendChild(star);
@@ -416,11 +779,7 @@ function drawCards() {
   // Play shuffle sound effects
   if (soundEnabled && playCardFlipSound) {
     // Play multiple card flip sounds with slight delay to simulate shuffling
-    for (let i = 0; i < 5; i++) {
-      setTimeout(() => {
-        playCardFlipSound();
-      }, i * 150);
-    }
+    playShuffleSound(5);
   }
 
   // Select and shuffle 10 random cards
@@ -486,132 +845,83 @@ function drawCards() {
       return;
     }
 
+    // Get card data
     const card = selectedCards[index];
     const isReversed = Math.random() < 0.5;
-    // Get the appropriate meaning based on the new JSON structure
-    const meaning = isReversed
-      ? card.reversed_meanings.general
-      : card.upright_meanings.general;
+    const meaning = isReversed ? card.reversed_meanings.general : card.upright_meanings.general;
 
-    // Get image file name and path
+    // Get image path
     const imageName = getImageFileName(card);
     const extension = imageName === 'TheLovers' ? 'jpg' : 'jpeg';
     const imageSrc = `image/${imageName}.${extension}`;
 
-    // Get position for this card
+    // Get position data
     const position = spreadPositions[index];
 
-    // Create card container with 3D perspective
+    // Create card container with Tailwind classes
     const cardContainer = document.createElement('div');
-    cardContainer.className = 'card-container tarot-position';
+    cardContainer.className = 'absolute w-[110px] h-[180px] md:w-[130px] md:h-[210px] rounded-xl shadow-card transition-all duration-500 tarot-position group hover:shadow-gold-glow cursor-pointer';
     cardContainer.style.top = position.top;
     cardContainer.style.left = position.left;
 
-    // Apply position-specific styling
-    if (position.offsetY) {
-      cardContainer.style.transform = `translateY(${position.offsetY})`;
-      cardContainer.dataset.offsetY = position.offsetY;
-      cardContainer.style.setProperty('--offset-y', position.offsetY);
-    }
+    // Apply position-specific styling using data attributes for CSS
+    // This allows CSS to handle the styling instead of inline styles
 
+    // Set z-index if specified
     if (position.zIndex) {
       cardContainer.style.zIndex = position.zIndex;
     }
 
-    // Store rotation information as a data attribute and CSS variable
+    // Handle vertical offset
+    if (position.offsetY) {
+      cardContainer.dataset.offsetY = position.offsetY;
+      cardContainer.style.setProperty('--offset-y', position.offsetY);
+    }
+
+    // Handle rotation
     if (position.rotate) {
       cardContainer.dataset.rotation = position.rotate;
       cardContainer.style.setProperty('--rotation', position.rotate);
-
-      // Add a special class for the Challenge card
-      if (position.isChallenge) {
-        cardContainer.classList.add('challenge-card');
-        // Ensure the Challenge card is properly positioned on top of the first card
-        cardContainer.style.top = spreadPositions[0].top;
-        cardContainer.style.left = spreadPositions[0].left;
-        // Set z-index to ensure it's above the first card
-        cardContainer.style.zIndex = '11';
-
-        // Apply specific styling for the Challenge card container
-        cardContainer.style.transformOrigin = 'center center';
-        cardContainer.style.transformStyle = 'preserve-3d';
-        // The rotation is now handled by CSS
-      }
     }
 
-    // Add position label
-    const positionLabel = document.createElement('div');
-    positionLabel.className = 'position-label';
-    positionLabel.textContent = position.label;
-    cardContainer.appendChild(positionLabel);
-
-    // Create the card element that will flip
-    const cardEl = document.createElement('div');
-    cardEl.className = 'card card-enter';
-
-    // Create card back (initially visible)
-    const cardBack = document.createElement('div');
-    cardBack.className = 'card-back';
-    cardBack.innerHTML = '<div class="text-4xl">🔮</div>';
-
-    // Create card front (initially hidden, will be revealed on flip)
-    const cardFront = document.createElement('div');
-    cardFront.className = 'card-front';
-
-    // Add card image and name to front with fallback
-    // Clear any existing content
-    cardFront.innerHTML = '';
-
-    // Create and append image container
-    const imageContainer = document.createElement('div');
-    imageContainer.className = 'card-image-container';
-
-    // Create and append image
-    const img = document.createElement('img');
-    img.src = imageSrc;
-    img.alt = card.name;
-    img.className = `card-image ${isReversed ? 'reversed' : ''}`;
-    img.setAttribute('loading', 'eager');
-
-    // Enhanced visual effects for reversed cards
-    if (isReversed) {
-      img.style.filter = 'brightness(0.9) contrast(1.1)';
-      img.style.boxShadow = '0 0 10px rgba(255, 0, 0, 0.2)';
-    } else {
-      img.style.filter = 'brightness(1.05)';
-      img.style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.2)';
+    // Special handling for Challenge card
+    if (position.isChallenge) {
+      cardContainer.classList.add('challenge-card');
+      // Ensure the Challenge card is properly positioned on top of the first card
+      cardContainer.style.top = spreadPositions[0].top;
+      cardContainer.style.left = spreadPositions[0].left;
+      cardContainer.style.zIndex = '11';
     }
 
-    img.onerror = function() {
-      this.onerror = null;
-      this.src = createFallbackCardImage(card.name);
-    };
+    // Create card elements using helper function
+    const { cardEl, cardFront, positionLabelEl } = createCardElements(card, isReversed, imageSrc, position.label);
 
-    // Create and append name label
-    const nameLabel = document.createElement('div');
-    nameLabel.className = `card-name-label ${isReversed ? 'reversed' : ''}`;
-    nameLabel.textContent = card.name;
-
-    // Append elements to card front
-    imageContainer.appendChild(img);
-    cardFront.appendChild(imageContainer);
-    cardFront.appendChild(nameLabel);
-
-    // Add click event to show card details in the side panel
+    // Add click event to show card details in the side panel and animate the card
     cardContainer.addEventListener('click', () => {
+      // Remove selected class from all cards first
+      document.querySelectorAll('.tarot-position').forEach(card => {
+        card.classList.remove('card-selected');
+      });
+
+      // Add selected class to this card to trigger the animation
+      cardContainer.classList.add('card-selected');
+
+      // Play flip sound for the animation
+      if (soundEnabled && playCardFlipSound) {
+        playCardFlipSound();
+      }
+
+      // Show card details in the side panel
       showCardDetails(card, isReversed, meaning, imageSrc, position.label);
     });
 
-    // Append back and front to the card
-    cardEl.appendChild(cardBack);
-    cardEl.appendChild(cardFront);
-
-    // Append card to container
+    // Append card and position label to container
+    cardContainer.appendChild(positionLabelEl);
     cardContainer.appendChild(cardEl);
 
-    // Add a subtle indicator that the card is clickable
+    // Add a subtle indicator that the card is clickable with Tailwind classes
     const clickIndicator = document.createElement('div');
-    clickIndicator.className = 'click-indicator';
+    clickIndicator.className = 'absolute top-2 right-2 w-5 h-5 rounded-full bg-gold/30 text-white/80 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20';
     clickIndicator.innerHTML = '<i class="fas fa-info-circle"></i>';
     cardContainer.appendChild(clickIndicator);
 
@@ -634,58 +944,40 @@ function drawCards() {
 
       // Flip the card after a short delay
       setTimeout(() => {
-        // Play flip sound
+        // Play flip sound and flip the card
         if (soundEnabled && playCardFlipSound) {
           playCardFlipSound();
         }
 
+        // Add flipped class to both elements
         cardEl.classList.add('flipped');
         cardContainer.classList.add('flipped');
 
-        // Enhanced special handling for the Challenge card when flipped
+        // Special handling for the Challenge card when flipped
         if (position.isChallenge) {
           // Set the transform for the card element (just the flip, not the rotation)
           cardEl.style.transform = 'rotateY(180deg)';
 
-          // Get the card image and ensure it's in the correct orientation
+          // Get the card image and update its class for proper orientation
           const cardImage = cardFront.querySelector('.card-image');
           if (cardImage) {
-            if (isReversed) {
-              // For reversed challenge cards, rotate 90 degrees clockwise with enhanced visual effect
-              cardImage.style.transform = 'rotate(90deg)';
-              cardImage.style.filter = 'brightness(0.85) contrast(1.15) saturate(0.9)';
-              cardImage.style.boxShadow = '0 0 15px rgba(255, 0, 0, 0.3)';
-            } else {
-              // For upright challenge cards, rotate 90 degrees counter-clockwise with enhanced visual effect
-              cardImage.style.transform = 'rotate(-90deg)';
-              cardImage.style.filter = 'brightness(1.1) saturate(1.05)';
-              cardImage.style.boxShadow = '0 0 15px rgba(255, 255, 255, 0.3)';
-            }
+            // Let CSS handle the rotation and visual effects
+            cardImage.classList.add('challenge');
           }
 
-          // Also ensure the name label is properly positioned with enhanced styling
+          // Update the name label class for proper positioning
           const nameLabel = cardFront.querySelector('.card-name-label');
           if (nameLabel) {
-            if (isReversed) {
-              nameLabel.style.transform = 'translateY(-50%) rotate(90deg)';
-              nameLabel.style.left = '5px';
-              nameLabel.style.right = 'auto';
-              nameLabel.style.color = 'rgba(255, 200, 200, 0.9)';
-            } else {
-              nameLabel.style.transform = 'translateY(-50%) rotate(-90deg)';
-              nameLabel.style.right = '5px';
-              nameLabel.style.left = 'auto';
-              nameLabel.style.color = 'rgba(200, 255, 200, 0.9)';
-            }
+            nameLabel.classList.add('challenge');
           }
 
-          // Make sure the card container has the correct z-index and enhanced styling
+          // Ensure the card container has the correct z-index
           cardContainer.style.zIndex = '11';
-          cardContainer.style.boxShadow = isReversed ?
-            '0 0 20px rgba(255, 100, 100, 0.3)' :
-            '0 0 20px rgba(100, 255, 100, 0.3)';
 
-          // The container rotation is now handled by CSS
+          // Add reversed class if needed for CSS styling
+          if (isReversed) {
+            cardContainer.classList.add('reversed-challenge');
+          }
         }
 
         // Draw the next card after this one is flipped
@@ -769,6 +1061,80 @@ function getImageFileName(card) {
   }
 
   return baseName;
+}
+
+/**
+ * Create card elements (front, back, image, label)
+ * @param {Object} card - The tarot card object
+ * @param {boolean} isReversed - Whether the card is reversed
+ * @param {string} imageSrc - Path to the card image
+ * @param {string} positionLabel - The position label in the spread
+ * @returns {Object} - Object containing card elements
+ */
+function createCardElements(card, isReversed, imageSrc, positionLabel) {
+  // Add position label with Tailwind classes
+  const positionLabelEl = document.createElement('div');
+  positionLabelEl.className = 'absolute -bottom-14 left-1/2 transform -translate-x-1/2 bg-mystic-purple/80 text-light-gold px-2 py-1 rounded text-xs md:text-sm whitespace-nowrap backdrop-blur-sm border border-gold/30';
+  positionLabelEl.textContent = positionLabel;
+
+  // Create the card element that will flip with Tailwind classes
+  const cardEl = document.createElement('div');
+  cardEl.className = 'relative w-full h-full transition-transform duration-800 transform-style-preserve-3d card card-enter';
+
+  // Create card back (initially visible) with Tailwind classes
+  const cardBack = document.createElement('div');
+  cardBack.className = 'absolute inset-0 backface-hidden flex items-center justify-center rounded-xl border-2 border-gold/60 bg-gradient-to-br from-mystic-purple to-deep-purple shadow-lg';
+  cardBack.innerHTML = '<div class="text-4xl">🔮</div>';
+
+  // Create card front (initially hidden, will be revealed on flip) with Tailwind classes
+  const cardFront = document.createElement('div');
+  cardFront.className = 'absolute inset-0 backface-hidden rounded-xl border-2 border-gold/60 bg-gradient-to-br from-deep-purple/90 to-midnight-blue/90 shadow-lg transform rotate-y-180';
+
+  // Create and append image container with Tailwind classes
+  const imageContainer = document.createElement('div');
+  imageContainer.className = 'flex items-center justify-center w-full h-[85%] p-2';
+
+  // Create and append image with Tailwind classes
+  const img = document.createElement('img');
+  img.src = imageSrc;
+  img.alt = card.name;
+  img.className = `w-full h-full object-contain transition-transform duration-500 ${isReversed ? 'reversed' : ''}`;
+  img.setAttribute('loading', 'eager');
+
+  img.onerror = function() {
+    this.onerror = null;
+    this.src = createFallbackCardImage(card.name);
+  };
+
+  // Create and append name label with Tailwind classes
+  const nameLabel = document.createElement('div');
+  nameLabel.className = `absolute bottom-1 left-0 right-0 text-center text-xs md:text-sm text-light-gold font-cinzel px-1 truncate ${isReversed ? 'reversed' : ''}`;
+  nameLabel.textContent = card.name;
+
+  // Append elements to card front
+  imageContainer.appendChild(img);
+  cardFront.appendChild(imageContainer);
+  cardFront.appendChild(nameLabel);
+
+  // Append back and front to the card
+  cardEl.appendChild(cardBack);
+  cardEl.appendChild(cardFront);
+
+  return { cardEl, cardFront, positionLabelEl, img, nameLabel };
+}
+
+/**
+ * Play multiple card flip sounds with delay to simulate shuffling
+ * @param {number} count - Number of sounds to play
+ */
+function playShuffleSound(count) {
+  if (!soundEnabled || !playCardFlipSound) return;
+
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      playCardFlipSound();
+    }, i * 150);
+  }
 }
 
 // Initialize the application when the DOM is fully loaded
