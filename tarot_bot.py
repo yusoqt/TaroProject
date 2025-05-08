@@ -3,13 +3,13 @@ Tarot Reading Bot using Google Gemini API
 
 This module provides functionality to generate tarot reading summaries
 using the Google Gemini API. It takes information about the drawn tarot cards
-and generates a mystical, fortune-teller style interpretation.
+and generates a mystical, fortune-teller style interpretation with detailed
+tarot card meanings from a comprehensive database.
 """
 
 import os
 import json
 import logging
-import traceback
 import google.generativeai as genai
 from dotenv import load_dotenv
 from text_utils import remove_special_characters
@@ -35,7 +35,7 @@ CORS(app)
 class TarotBot:
     def __init__(self, model="gemini-1.5-flash"):
         """
-        Initialize the tarot bot with Google Gemini API
+        Initialize the tarot bot with Google Gemini API and load tarot card data
 
         Args:
             model (str): The Gemini model to use
@@ -54,6 +54,61 @@ class TarotBot:
         # Initialize the model with fortune teller persona
         self.fortune_teller = genai.GenerativeModel(self.model)
 
+        # Load tarot card data
+        self.tarot_data = self._load_tarot_data()
+
+    def _load_tarot_data(self):
+        """
+        Load tarot card data from JSON file
+
+        Returns:
+            dict: Dictionary of tarot card data indexed by card name
+        """
+        try:
+            with open('newtarot.json', 'r', encoding='utf-8') as file:
+                tarot_cards = json.load(file)
+
+            # Create a dictionary indexed by card name for easy lookup
+            tarot_dict = {}
+            for card in tarot_cards:
+                tarot_dict[card['name']] = card
+
+            return tarot_dict
+        except Exception as e:
+            logger.error(f"Error loading tarot data: {e}")
+            return {}
+
+    def _get_card_meaning(self, card_name, is_reversed):
+        """
+        Get the meaning of a tarot card based on its orientation
+
+        Args:
+            card_name (str): The name of the tarot card
+            is_reversed (bool): Whether the card is reversed
+
+        Returns:
+            str: The meaning of the card
+        """
+        if not self.tarot_data or card_name not in self.tarot_data:
+            return "ไม่พบข้อมูลไพ่"
+
+        card_data = self.tarot_data[card_name]
+
+        if is_reversed:
+            # Get reversed meaning
+            if 'reversed_meanings' in card_data and 'general' in card_data['reversed_meanings']:
+                return card_data['reversed_meanings']['general']
+            elif 'keywords' in card_data and 'reversed' in card_data['keywords']:
+                return card_data['keywords']['reversed']
+        else:
+            # Get upright meaning
+            if 'upright_meanings' in card_data and 'general' in card_data['upright_meanings']:
+                return card_data['upright_meanings']['general']
+            elif 'keywords' in card_data and 'upright' in card_data['keywords']:
+                return card_data['keywords']['upright']
+
+        return "ไม่พบความหมายของไพ่"
+
     def generate_reading_summary(self, cards_data):
         """
         Generate a summary of the tarot reading based on the drawn cards
@@ -64,44 +119,40 @@ class TarotBot:
                 - name: Card name
                 - position: Position in the spread (e.g., "Present", "Challenge")
                 - isReversed: Boolean indicating if card is reversed
-                - meaning: The meaning of the card in this position (optional)
 
         Returns:
             str: A mystical interpretation of the tarot reading
         """
         try:
-            logger.info(f"Received {len(cards_data)} cards for reading")
-            for i, card in enumerate(cards_data):
-                logger.info(f"Card {i+1}: {card.get('name')} at position {card.get('position')}, reversed: {card.get('isReversed')}")
-
+            # Ensure we have enough cards for a reading
             if len(cards_data) < 3:
-                logger.warning("Not enough cards provided for reading")
-                return "ขออภัยค่ะ หมอต้องการไพ่อย่างน้อย 3 ใบเพื่อทำนาย โปรดลองสุ่มไพ่ใหม่อีกครั้ง"
+                return "สวัสดีค่ะคุณผู้ชม ดิฉันหมอดูพรพิมล ยินดีที่ได้อ่านไพ่ทาโร่ให้คุณในวันนี้ค่ะ\n\nหมอต้องการไพ่อย่างน้อย 3 ใบเพื่อทำนาย โปรดลองสุ่มไพ่ใหม่อีกครั้งนะคะ เพื่อที่หมอจะได้ดูดวงให้คุณได้อย่างแม่นยำค่ะ"
 
+            # Enhance cards with detailed meanings from our database
+            for card in cards_data:
+                card_name = card.get('name')
+                is_reversed = card.get('isReversed', False)
+
+                # Add detailed meaning from our database
+                card['meaning'] = self._get_card_meaning(card_name, is_reversed)
+
+            # Create prompt with enhanced card data
             prompt = self._create_tarot_prompt(cards_data)
-            logger.debug("Created prompt for Gemini API")
 
-            logger.info("Sending request to Gemini API")
+            # Generate content
             response = self.fortune_teller.generate_content(prompt)
-            logger.info("Received response from Gemini API")
 
+            # Clean and return the response
             summary = remove_special_characters(response.text)
-            logger.debug("Cleaned response text of special characters")
             return summary
 
-        except ValueError as e:
-            # Handle specific value errors (like API key issues)
-            logger.error(f"Value error in tarot reading generation: {e}")
-            traceback.print_exc()
-            if "API key" in str(e):
-                return "ขออภัยค่ะ หมอดูไม่สามารถใช้พลังได้ในขณะนี้ โปรดตรวจสอบว่าได้ตั้งค่า API key ถูกต้องแล้ว"
-            return "ขออภัยค่ะ เกิดข้อผิดพลาดในการอ่านไพ่ โปรดลองใหม่อีกครั้ง"
+        except ValueError:
+            # Create a mystical error message without mentioning backend issues
+            return "สวัสดีค่ะคุณผู้ชม ดิฉันหมอดูพรพิมล ยินดีที่ได้อ่านไพ่ทาโร่ให้คุณในวันนี้ค่ะ\n\nดวงดาวกำลังเคลื่อนตัวในตำแหน่งที่ไม่เอื้ออำนวยต่อการทำนาย หมอขอแนะนำให้คุณลองใหม่อีกครั้งในเวลาที่พลังจักรวาลเป็นใจนะคะ"
 
-        except Exception as e:
-            # Handle general exceptions
-            logger.error(f"Error generating tarot reading: {e}")
-            traceback.print_exc()
-            return "ขออภัยค่ะ หมอไม่สามารถอ่านไพ่ได้ในขณะนี้ พลังงานจักรวาลอาจถูกรบกวน โปรดลองใหม่อีกครั้งในภายหลัง หรือตรวจสอบว่าได้ตั้งค่า API key ถูกต้องแล้ว"
+        except Exception:
+            # Create a mystical error message without mentioning backend issues
+            return "สวัสดีค่ะคุณผู้ชม ดิฉันหมอดูพรพิมล ยินดีที่ได้อ่านไพ่ทาโร่ให้คุณในวันนี้ค่ะ\n\nพลังงานจักรวาลกำลังแปรปรวน ทำให้หมอไม่สามารถเชื่อมต่อกับพลังแห่งไพ่ทาโร่ได้อย่างสมบูรณ์ หมอขอแนะนำให้คุณลองใหม่อีกครั้งในภายหลังนะคะ เมื่อดวงดาวเรียงตัวในตำแหน่งที่เหมาะสม"
 
     def _create_tarot_prompt(self, cards_data):
         """
@@ -117,6 +168,8 @@ class TarotBot:
         คุณคือหมอดูไพ่ทาโร่ที่มีประสบการณ์สูง พูดจาด้วยน้ำเสียงลึกลับ มีความรู้เรื่องโหราศาสตร์และไพ่ทาโร่อย่างลึกซึ้ง
         ใช้คำพูดแบบหมอดูไทย เช่น "ดวงของคุณ..." "ไพ่บ่งบอกว่า..." "พลังงานที่ส่งมา..." "ดวงดาวกำลังบอกว่า..."
 
+        ห้ามพูดถึงเรื่องเบื้องหลังหรือ Backend หรือการรอข้อมูล หรือการประมวลผล ให้พูดเหมือนหมอดูจริงๆ ที่มีความรู้เรื่องไพ่ทาโร่อย่างลึกซึ้ง
+
         โปรดวิเคราะห์ไพ่ทาโร่ต่อไปนี้และให้คำทำนายโดยรวมที่เชื่อมโยงความหมายของไพ่ทั้งหมดเข้าด้วยกัน
         ใช้ภาษาไทยในการตอบและพยายามให้คำทำนายที่มีความหวังและเป็นประโยชน์ต่อผู้ถาม
 
@@ -128,10 +181,20 @@ class TarotBot:
             prompt += f"\n- ตำแหน่ง '{card.get('position')}': ไพ่ {card.get('name')} ({card_status})"
             prompt += f"\n  ความหมาย: {card.get('meaning')}"
 
+            # Add keywords if available
+            if card.get('name') in self.tarot_data:
+                card_data = self.tarot_data[card.get('name')]
+                if card.get("isReversed") and 'keywords' in card_data and 'reversed' in card_data['keywords']:
+                    prompt += f"\n  คำสำคัญ: {card_data['keywords']['reversed']}"
+                elif not card.get("isReversed") and 'keywords' in card_data and 'upright' in card_data['keywords']:
+                    prompt += f"\n  คำสำคัญ: {card_data['keywords']['upright']}"
+
         prompt += """
 
         โปรดสรุปคำทำนายทั้งหมดในรูปแบบของหมอดูไทย โดยเชื่อมโยงความหมายของไพ่แต่ละใบเข้าด้วยกัน
         และให้คำแนะนำที่เป็นประโยชน์แก่ผู้ถาม ความยาวประมาณ 3-4 ย่อหน้า
+
+        ห้ามพูดถึงเรื่องเบื้องหลังหรือ Backend หรือการรอข้อมูล หรือการประมวลผล ให้พูดเหมือนหมอดูจริงๆ ที่มีความรู้เรื่องไพ่ทาโร่อย่างลึกซึ้ง
 
         เริ่มต้นด้วยคำทักทายแบบหมอดู และจบด้วยคำแนะนำหรือกำลังใจ
         """
@@ -151,41 +214,31 @@ def health_check():
 @app.route('/api/tarot-reading', methods=['POST'])
 def tarot_reading():
     try:
-        logger.info("Received tarot reading request")
         data = request.json
         cards_data = data.get('cards', [])
 
         if not cards_data:
-            logger.warning("Request received with no card data")
-            return jsonify({"error": "No card data provided"}), 400
+            # Mystical error message for no cards
+            return jsonify({
+                "reading": "สวัสดีค่ะคุณผู้ชม ดิฉันหมอดูพรพิมล ยินดีที่ได้อ่านไพ่ทาโร่ให้คุณในวันนี้ค่ะ\n\nหมอต้องการไพ่เพื่อทำนาย โปรดกดปุ่มสุ่มไพ่เพื่อให้หมอได้ดูดวงให้คุณนะคะ"
+            })
 
-        logger.info(f"Initializing tarot bot with {len(cards_data)} cards")
+        # Initialize tarot bot with card data
         bot = TarotBot()
-
         reading = bot.generate_reading_summary(cards_data)
-        logger.info("Successfully generated tarot reading")
 
         return jsonify({"reading": reading})
 
-    except ValueError as e:
-        logger.error(f"Value error in API endpoint: {e}")
-        if "GEMINI_API_KEY environment variable not set" in str(e):
-            return jsonify({"error": "API key ไม่ถูกตั้งค่า โปรดตรวจสอบไฟล์ .env ของคุณ"}), 500
-        return jsonify({"error": str(e)}), 500
-    except Exception as e:
-        logger.error(f"API error: {e}")
-        traceback.print_exc()
-
-        # Provide a more specific error message based on the exception type
-        if "Connection" in str(e):
-            logger.error("Connection error detected")
-            return jsonify({"error": "ไม่สามารถเชื่อมต่อกับ API ได้ โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต"}), 500
-        elif "Timeout" in str(e):
-            logger.error("Timeout error detected")
-            return jsonify({"error": "การเชื่อมต่อกับหมอดูหมดเวลา โปรดลองใหม่อีกครั้ง"}), 500
-        else:
-            logger.error(f"Unspecified error: {str(e)}")
-            return jsonify({"error": "ขออภัย ไม่สามารถเชื่อมต่อกับหมอดูได้ในขณะนี้ โปรดลองใหม่อีกครั้งในภายหลัง"}), 500
+    except ValueError:
+        # Mystical error message without mentioning backend issues
+        return jsonify({
+            "reading": "สวัสดีค่ะคุณผู้ชม ดิฉันหมอดูพรพิมล ยินดีที่ได้อ่านไพ่ทาโร่ให้คุณในวันนี้ค่ะ\n\nดวงดาวกำลังเคลื่อนตัวในตำแหน่งที่ไม่เอื้ออำนวยต่อการทำนาย หมอขอแนะนำให้คุณลองใหม่อีกครั้งในเวลาที่พลังจักรวาลเป็นใจนะคะ"
+        })
+    except Exception:
+        # Mystical error message without mentioning backend issues
+        return jsonify({
+            "reading": "สวัสดีค่ะคุณผู้ชม ดิฉันหมอดูพรพิมล ยินดีที่ได้อ่านไพ่ทาโร่ให้คุณในวันนี้ค่ะ\n\nพลังงานจักรวาลกำลังแปรปรวน ทำให้หมอไม่สามารถเชื่อมต่อกับพลังแห่งไพ่ทาโร่ได้อย่างสมบูรณ์ หมอขอแนะนำให้คุณลองใหม่อีกครั้งในภายหลังนะคะ เมื่อดวงดาวเรียงตัวในตำแหน่งที่เหมาะสม"
+        })
 
 # Run the Flask app if executed directly
 if __name__ == "__main__":
