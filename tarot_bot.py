@@ -33,7 +33,7 @@ app = Flask(__name__)
 CORS(app)
 
 class TarotBot:
-    def __init__(self, model="gemini-1.5-flash"):
+    def __init__(self, model="gemini-2.0-flash"):
         """
         Initialize the tarot bot with Google Gemini API and load tarot card data
 
