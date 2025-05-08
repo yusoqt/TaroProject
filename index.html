@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Mystical Tarot Reading - Discover your destiny with our Celtic Cross tarot spread" />
   <title>Mystical Tarot Reading</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&display=swap" rel="stylesheet">
@@ -102,24 +103,33 @@
   </div>
 
   <!-- Draw button with enhanced styling -->
-  <button id="drawTenBtn" class="px-8 py-4 bg-gradient-to-br from-mystic-purple via-deep-purple to-midnight-blue text-light-gold rounded-xl shadow-xl hover:shadow-gold-glow transition-all duration-500 font-cinzel text-xl mb-10 flex items-center justify-center relative overflow-hidden group">
+  <button id="drawTenBtn" class="px-10 py-5 bg-gradient-to-br from-mystic-purple via-deep-purple to-midnight-blue text-light-gold rounded-xl shadow-xl hover:shadow-gold-glow transition-all duration-500 font-cinzel text-xl mb-10 flex items-center justify-center relative overflow-hidden group transform hover:-translate-y-1">
     <!-- Animated background effect -->
     <div class="absolute inset-0 bg-gradient-to-r from-gold/10 to-gold/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
     <!-- Decorative elements -->
-    <div class="absolute top-0 left-0 w-4 h-4 border-t border-l border-gold/40 rounded-tl-md"></div>
-    <div class="absolute top-0 right-0 w-4 h-4 border-t border-r border-gold/40 rounded-tr-md"></div>
-    <div class="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-gold/40 rounded-bl-md"></div>
-    <div class="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-gold/40 rounded-br-md"></div>
+    <div class="absolute top-0 left-0 w-6 h-6 border-t border-l border-gold/40 rounded-tl-md"></div>
+    <div class="absolute top-0 right-0 w-6 h-6 border-t border-r border-gold/40 rounded-tr-md"></div>
+    <div class="absolute bottom-0 left-0 w-6 h-6 border-b border-l border-gold/40 rounded-bl-md"></div>
+    <div class="absolute bottom-0 right-0 w-6 h-6 border-b border-r border-gold/40 rounded-br-md"></div>
+
+    <!-- Mystical sparkles -->
+    <div class="absolute top-1/4 left-1/4 w-1 h-1 bg-gold/70 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-1 h-1 bg-gold/70 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse" style="animation-delay: 0.3s"></div>
+    <div class="absolute top-3/4 right-1/3 w-1 h-1 bg-gold/70 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse" style="animation-delay: 0.6s"></div>
+
+    <!-- Subtle glow effect -->
+    <div class="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+         style="background: radial-gradient(circle at center, rgba(212, 175, 55, 0.3) 0%, transparent 70%);"></div>
 
     <!-- Icon with animation -->
     <div class="mr-3 relative">
-      <i class="fas fa-magic text-gold group-hover:text-light-gold transition-colors duration-300"></i>
+      <i class="fas fa-magic text-gold group-hover:text-light-gold transition-colors duration-300 group-hover:scale-125 transform transition-transform duration-500"></i>
       <span class="absolute -top-1 -right-1 w-2 h-2 bg-gold/50 rounded-full opacity-0 group-hover:opacity-100 animate-pulse"></span>
     </div>
 
     <!-- Text with subtle animation -->
-    <span class="relative z-10 group-hover:tracking-wider transition-all duration-300">Reveal Your Destiny</span>
+    <span class="relative z-10 group-hover:tracking-wider transition-all duration-300 text-shadow-sm">Reveal Your Destiny</span>
   </button>
 
   <!-- Enhanced loading indicator -->
@@ -145,7 +155,7 @@
 
   <div class="w-full max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 mb-12">
     <!-- Card display area with enhanced styling -->
-    <div id="tenCardDisplay" class="relative w-full max-w-5xl h-[700px] md:h-[800px] lg:h-[900px] mx-auto flex-1 bg-gradient-to-b from-mystic-purple/5 to-midnight-blue/5 rounded-xl border border-gold/20 shadow-xl overflow-hidden pb-24">
+    <div id="tenCardDisplay" class="relative w-full max-w-5xl h-[750px] md:h-[850px] lg:h-[950px] mx-auto flex-1 bg-gradient-to-b from-mystic-purple/5 to-midnight-blue/5 rounded-xl border border-gold/20 shadow-xl overflow-hidden pb-32 mt-6">
       <!-- Decorative corner elements -->
       <div class="absolute top-3 left-3 w-12 h-12 border-t border-l border-gold/30 rounded-tl-lg pointer-events-none"></div>
       <div class="absolute top-3 right-3 w-12 h-12 border-t border-r border-gold/30 rounded-tr-lg pointer-events-none"></div>
@@ -171,6 +181,9 @@
 
       <!-- Subtle glow effect in the center -->
       <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-gold/5 filter blur-xl pointer-events-none"></div>
+
+      <!-- Position indicators for better visual guidance -->
+      <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-gold/40 text-sm font-cinzel tracking-wider">Celtic Cross Layout</div>
     </div>
 
     <!-- Card detail panel with enhanced styling -->
@@ -428,20 +441,24 @@
     </div>
   </div>
 
-  <div class="flex justify-center mb-12 mt-8">
-    <button id="resetBtn" class="hidden px-8 py-4 bg-gradient-to-br from-mystic-purple via-deep-purple to-midnight-blue text-light-gold rounded-xl shadow-xl hover:shadow-gold-glow transition-all duration-500 font-cinzel text-xl flex items-center justify-center relative overflow-hidden group">
+  <div class="flex justify-center mb-12 mt-10">
+    <button id="resetBtn" class="hidden px-10 py-4 bg-gradient-to-br from-mystic-purple via-deep-purple to-midnight-blue text-light-gold rounded-xl shadow-xl hover:shadow-gold-glow transition-all duration-500 font-cinzel text-xl flex items-center justify-center relative overflow-hidden group transform hover:-translate-y-1">
       <!-- Animated background effect -->
       <div class="absolute inset-0 bg-gradient-to-r from-gold/10 to-gold/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
 
       <!-- Decorative elements -->
-      <div class="absolute top-0 left-0 w-4 h-4 border-t border-l border-gold/40 rounded-tl-md"></div>
-      <div class="absolute top-0 right-0 w-4 h-4 border-t border-r border-gold/40 rounded-tr-md"></div>
-      <div class="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-gold/40 rounded-bl-md"></div>
-      <div class="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-gold/40 rounded-br-md"></div>
+      <div class="absolute top-0 left-0 w-6 h-6 border-t border-l border-gold/40 rounded-tl-md"></div>
+      <div class="absolute top-0 right-0 w-6 h-6 border-t border-r border-gold/40 rounded-tr-md"></div>
+      <div class="absolute bottom-0 left-0 w-6 h-6 border-b border-l border-gold/40 rounded-bl-md"></div>
+      <div class="absolute bottom-0 right-0 w-6 h-6 border-b border-r border-gold/40 rounded-br-md"></div>
+
+      <!-- Subtle glow effect -->
+      <div class="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+           style="background: radial-gradient(circle at center, rgba(212, 175, 55, 0.2) 0%, transparent 70%);"></div>
 
       <!-- Icon with animation -->
       <div class="mr-3 relative">
-        <i class="fas fa-magic text-gold group-hover:text-light-gold transition-colors duration-300"></i>
+        <i class="fas fa-sync-alt text-gold group-hover:text-light-gold transition-colors duration-300 group-hover:rotate-180 transform transition-transform duration-700"></i>
         <span class="absolute -top-1 -right-1 w-2 h-2 bg-gold/50 rounded-full opacity-0 group-hover:opacity-100 animate-pulse"></span>
       </div>
 
@@ -604,10 +621,43 @@
       border-radius: 50%;
       animation: twinkle 4s ease-in-out infinite;
     }
+
+    /* Summary panel animations */
+    #summaryPanel {
+      transition: all 0.3s ease-in-out;
+    }
+
+    #summaryPanel.fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    #summaryPanel.fade-out {
+      animation: fadeOut 0.3s ease-in forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(10px); }
+    }
+
+    /* Server status indicator styles */
+    #serverStatusIndicator {
+      transition: opacity 1s ease-out;
+    }
+
+    #serverStatusIndicator.opacity-0 {
+      opacity: 0;
+    }
   </style>
 
   <script src="card-flip.js"></script>
   <script src="script.js"></script>
+  <script src="tarot_summary.js"></script>
 </body>
 
 </html>

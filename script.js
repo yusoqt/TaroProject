@@ -17,18 +17,18 @@ let playCardFlipSound = window.createCardFlipSound ? window.createCardFlipSound(
 // Define the positions for the 10-card Celtic Cross spread
 // Optimized Celtic Cross layout with improved spacing on both X and Y axes
 // Enhanced visual separation between cards for better readability
-// Adjusted to be less tall at the top and more space at the bottom
+// Adjusted to be lower from the top and more space at the bottom
 const spreadPositions = [
-  { top: '38%', left: '35%', zIndex: 10, label: '1. Present' },           // Center/Present - adjusted for better balance
-  { top: '38%', left: '35%', rotate: '90deg', zIndex: 11, label: '2. Challenge', isChallenge: true, offsetY: '0px' },  // Crossing card - positioned on top of Present card
-  { top: '65%', left: '35%', zIndex: 3, label: '3. Foundation' },        // Below - better vertical spacing
-  { top: '12%', left: '35%', zIndex: 3, label: '4. Crown' },             // Above - better vertical spacing (moved down slightly)
-  { top: '38%', left: '15%', zIndex: 3, label: '5. Past' },              // Left - better horizontal spacing
-  { top: '38%', left: '55%', zIndex: 3, label: '6. Future' },            // Right - better horizontal spacing
-  { top: '70%', left: '75%', zIndex: 4, label: '7. Advice' },            // Bottom of staff - moved up and left to stay within boundaries
-  { top: '55%', left: '75%', zIndex: 5, label: '8. External' },          // Second from bottom - better vertical spacing
-  { top: '38%', left: '75%', zIndex: 6, label: '9. Hopes/Fears' },       // Third from bottom - better vertical spacing
-  { top: '20%', left: '75%', zIndex: 7, label: '10. Outcome' }           // Top of staff - better vertical spacing
+  { top: '45%', left: '35%', zIndex: 10, label: '1. Present' },           // Center/Present - moved lower for better balance
+  { top: '45%', left: '35%', rotate: '90deg', zIndex: 11, label: '2. Challenge', isChallenge: true, offsetY: '0px' },  // Crossing card - positioned on top of Present card
+  { top: '70%', left: '35%', zIndex: 3, label: '3. Foundation' },        // Below - increased vertical spacing
+  { top: '20%', left: '35%', zIndex: 3, label: '4. Crown' },             // Above - moved down more for better balance
+  { top: '45%', left: '12%', zIndex: 3, label: '5. Past' },              // Left - increased horizontal spacing
+  { top: '45%', left: '58%', zIndex: 3, label: '6. Future' },            // Right - increased horizontal spacing
+  { top: '75%', left: '78%', zIndex: 4, label: '7. Advice' },            // Bottom of staff - better positioned
+  { top: '60%', left: '78%', zIndex: 5, label: '8. External' },          // Second from bottom - better vertical spacing
+  { top: '45%', left: '78%', zIndex: 6, label: '9. Hopes/Fears' },       // Third from bottom - aligned with center row
+  { top: '25%', left: '78%', zIndex: 7, label: '10. Outcome' }           // Top of staff - better vertical spacing
 ];
 
 // Create deck visualization
@@ -124,6 +124,29 @@ function cacheElements() {
  * Load tarot card data from JSON file
  */
 function loadTarotData() {
+  document.body.classList.add('loading');
+
+  const cachedData = sessionStorage.getItem('tarotData');
+  if (cachedData) {
+    try {
+      tarotData = JSON.parse(cachedData);
+      console.log('Using cached tarot data');
+
+      setTimeout(() => {
+        createDeck();
+        requestAnimationFrame(() => {
+          createStars();
+          initializeEventListeners();
+          document.body.classList.remove('loading');
+        });
+      }, 0);
+
+      return;
+    } catch (e) {
+      console.warn('Error parsing cached data, fetching fresh data');
+    }
+  }
+
   fetch('newtarot.json')
     .then(response => {
       if (!response.ok) {
@@ -132,15 +155,27 @@ function loadTarotData() {
       return response.json();
     })
     .then(data => {
-      // The new JSON structure is an array directly, not an object with a cards property
       tarotData = data;
-      createDeck();
-      createStars(); // Create the mystical star background
-      initializeEventListeners(); // Set up all event listeners
+
+      try {
+        sessionStorage.setItem('tarotData', JSON.stringify(data));
+      } catch (e) {
+        console.warn('Could not cache tarot data:', e);
+      }
+
+      setTimeout(() => {
+        createDeck();
+        requestAnimationFrame(() => {
+          createStars();
+          initializeEventListeners();
+          document.body.classList.remove('loading');
+        });
+      }, 0);
     })
     .catch(error => {
       console.error('Error loading tarot data:', error);
       showError('Error loading tarot data. Please refresh the page.');
+      document.body.classList.remove('loading');
     });
 }
 
@@ -518,33 +553,38 @@ function closeCardDetails() {
  * Initialize all event listeners
  */
 function initializeEventListeners() {
-  // Sound toggle
-  if (domElements.soundButton) {
-    domElements.soundButton.addEventListener('click', toggleSound);
+  document.addEventListener('click', function(event) {
+    const button = event.target.closest('button');
+
+    if (!button) return;
+
+    switch (button.id) {
+      case 'soundToggle':
+        toggleSound();
+        break;
+      case 'resetBtn':
+        resetReading();
+        break;
+      case 'drawTenBtn':
+        drawCards();
+        break;
+      case 'closeDetailBtn':
+        closeCardDetails();
+        break;
+    }
+  }, { passive: true });
+
+  document.addEventListener('keydown', handleKeyboardEvents, { passive: true });
+
+  let resizeTimeout;
+  window.addEventListener('resize', function() {
+    if (resizeTimeout) clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(handleWindowResize, 100);
+  }, { passive: true });
+
+  if (typeof initTarotSummary === 'function') {
+    setTimeout(initTarotSummary, 100);
   }
-
-
-
-  // Reset button
-  if (domElements.resetButton) {
-    domElements.resetButton.addEventListener('click', resetReading);
-  }
-
-  // Draw button
-  if (domElements.drawButton) {
-    domElements.drawButton.addEventListener('click', drawCards);
-  }
-
-  // Close detail panel button
-  if (domElements.closeDetailBtn) {
-    domElements.closeDetailBtn.addEventListener('click', closeCardDetails);
-  }
-
-  // Add keyboard accessibility
-  document.addEventListener('keydown', handleKeyboardEvents);
-
-  // Add window resize handler to adjust layout if needed
-  window.addEventListener('resize', handleWindowResize);
 }
 
 /**
@@ -703,53 +743,58 @@ function handleWindowResize() {
 
 /**
  * Create mystical star background
- * Optimized to create a more visually appealing starry background
  */
 function createStars() {
   if (!domElements.starsContainer) return;
 
-  const numStars = 120; // Increased number of stars for a more immersive experience
-  // Use document fragment for better performance when adding multiple elements
+  const numStars = 80;
   const fragment = document.createDocumentFragment();
+  const styleElement = document.createElement('style');
+  let styleRules = '';
 
   for (let i = 0; i < numStars; i++) {
     const star = document.createElement('div');
-    star.className = 'absolute rounded-full animate-twinkle';
+    star.className = `star star-${i}`;
+    fragment.appendChild(star);
 
-    // Random position
     const x = Math.random() * 100;
     const y = Math.random() * 100;
-    star.style.left = `${x}%`;
-    star.style.top = `${y}%`;
-
-    // Random size (1-3px) with more variation
     const size = 0.8 + Math.random() * 2.2;
-    star.style.width = `${size}px`;
-    star.style.height = `${size}px`;
-
-    // Random animation delay for twinkling effect
     const delay = Math.random() * 5;
-    star.style.animationDelay = `${delay}s`;
-
-    // Random animation duration for more natural twinkling
     const duration = 3 + Math.random() * 3;
-    star.style.animationDuration = `${duration}s`;
 
-    // Add a subtle gold tint to some stars
+    let backgroundColor;
+    let boxShadow = '';
+
     if (Math.random() > 0.7) {
-      star.style.backgroundColor = '#F1E5AC';
+      backgroundColor = '#F1E5AC'; // Gold tint
     } else if (Math.random() > 0.9) {
-      // Add a few brighter stars
-      star.style.backgroundColor = '#FFFFFF';
-      star.style.boxShadow = '0 0 3px rgba(255, 255, 255, 0.8)';
+      backgroundColor = '#FFFFFF'; // Brighter stars
+      boxShadow = '0 0 3px rgba(255, 255, 255, 0.8)';
     } else {
-      star.style.backgroundColor = '#FFFFFF';
+      backgroundColor = '#FFFFFF'; // Regular stars
     }
 
-    fragment.appendChild(star);
+    styleRules += `
+      .star-${i} {
+        position: absolute;
+        left: ${x}%;
+        top: ${y}%;
+        width: ${size}px;
+        height: ${size}px;
+        background-color: ${backgroundColor};
+        border-radius: 50%;
+        animation: twinkle ${duration}s ease-in-out infinite;
+        animation-delay: ${delay}s;
+        ${boxShadow ? `box-shadow: ${boxShadow};` : ''}
+        will-change: opacity;
+        contain: layout style;
+      }
+    `;
   }
 
-  // Add all stars to the container at once (more efficient)
+  styleElement.textContent = styleRules;
+  document.head.appendChild(styleElement);
   domElements.starsContainer.appendChild(fragment);
 }
 
@@ -782,13 +827,15 @@ function drawCards() {
     playShuffleSound(5);
   }
 
-  // Select and shuffle 10 random cards
-  const shuffled = [...tarotData].sort(() => 0.5 - Math.random());
-  const selectedCards = shuffled.slice(0, 10);
+  // Use a more efficient shuffling algorithm (Fisher-Yates)
+  const selectedCards = getRandomCards(tarotData, 10);
 
-  // Clear the display container
+  // Clear the display container - use document fragment for better performance
   if (domElements.displayContainer) {
-    domElements.displayContainer.innerHTML = '';
+    // Clear existing content
+    while (domElements.displayContainer.firstChild) {
+      domElements.displayContainer.removeChild(domElements.displayContainer.firstChild);
+    }
   }
 
   // Show reset button
@@ -800,17 +847,19 @@ function drawCards() {
   const drawSequence = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
   let currentDrawIndex = 0;
 
-  // Start drawing cards with a delay
-  setTimeout(() => {
-    drawNextInSequence();
-  }, 800);
+  // Use requestAnimationFrame for better performance than setTimeout
+  requestAnimationFrame(() => {
+    // Add a small delay to allow UI to update
+    setTimeout(() => {
+      drawNextInSequence();
+    }, 800);
+  });
 
   /**
    * Draw the next card in sequence
    */
   function drawNextInSequence() {
     if (currentDrawIndex >= drawSequence.length) {
-      // All cards have been drawn, reset the drawing state
       isDrawing = false;
 
       if (domElements.drawButton) {
@@ -825,6 +874,50 @@ function drawCards() {
       if (domElements.deckContainer) {
         domElements.deckContainer.classList.remove('animate-pulse');
       }
+
+      requestAnimationFrame(() => {
+        console.log('All cards drawn, dispatching event and showing summary button');
+
+        // Dispatch the event for other components to react
+        const allCardsDrawnEvent = new CustomEvent('allCardsDrawn', {
+          detail: { cards: selectedCards }
+        });
+        document.dispatchEvent(allCardsDrawnEvent);
+
+        // Try to show the summary button directly
+        setTimeout(() => {
+          const summaryBtn = document.getElementById('summaryBtn');
+          if (summaryBtn) {
+            console.log('Found summary button, making it visible');
+            summaryBtn.classList.remove('hidden');
+            summaryBtn.style.display = 'flex'; // Force display
+
+            // Ensure button has the correct size
+            summaryBtn.className = 'px-6 py-3 bg-gradient-to-br from-mystic-purple via-deep-purple to-midnight-blue text-light-gold rounded-xl shadow-xl hover:shadow-gold-glow transition-all duration-500 font-cinzel text-lg flex items-center justify-center relative overflow-hidden group transform hover:-translate-y-1';
+          } else {
+            console.log('Summary button not found in DOM');
+
+            // Try to call the function from tarot_summary.js if available
+            if (typeof showSummaryButton === 'function') {
+              console.log('Calling showSummaryButton function');
+              showSummaryButton();
+            }
+          }
+        }, 1000);
+
+        // Double-check after a longer delay
+        setTimeout(() => {
+          const summaryBtn = document.getElementById('summaryBtn');
+          if (summaryBtn) {
+            console.log('Final check: making summary button visible');
+            summaryBtn.classList.remove('hidden');
+            summaryBtn.style.display = 'flex'; // Force display
+
+            // Ensure button has the correct size
+            summaryBtn.className = 'px-6 py-3 bg-gradient-to-br from-mystic-purple via-deep-purple to-midnight-blue text-light-gold rounded-xl shadow-xl hover:shadow-gold-glow transition-all duration-500 font-cinzel text-lg flex items-center justify-center relative overflow-hidden group transform hover:-translate-y-1';
+          }
+        }, 3000);
+      });
 
       return;
     }
@@ -925,16 +1018,30 @@ function drawCards() {
     clickIndicator.innerHTML = '<i class="fas fa-info-circle"></i>';
     cardContainer.appendChild(clickIndicator);
 
-    // Append to display
-    if (domElements.displayContainer) {
-      domElements.displayContainer.appendChild(cardContainer);
+    // Use document fragment for better performance
+    // We'll collect all cards in a fragment and append them at once
+    if (!window.cardFragment) {
+      window.cardFragment = document.createDocumentFragment();
+    }
+
+    // Add to fragment instead of directly to DOM
+    window.cardFragment.appendChild(cardContainer);
+
+    // If this is the last card, append the fragment to the display
+    if (index === 9 && domElements.displayContainer) {
+      domElements.displayContainer.appendChild(window.cardFragment);
+      // Reset the fragment
+      window.cardFragment = null;
     }
 
     // If this is the first card, also show the detail panel with its information
     if (index === 0) {
-      setTimeout(() => {
-        showCardDetails(card, isReversed, meaning, imageSrc, position.label);
-      }, 1500);
+      // Use requestAnimationFrame for smoother animation
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          showCardDetails(card, isReversed, meaning, imageSrc, position.label);
+        }, 1500);
+      });
     }
 
     // Animate the card entrance
@@ -1094,17 +1201,26 @@ function createCardElements(card, isReversed, imageSrc, positionLabel) {
   const imageContainer = document.createElement('div');
   imageContainer.className = 'flex items-center justify-center w-full h-[85%] p-2';
 
-  // Create and append image with Tailwind classes
+  // Create and append image with Tailwind classes and optimized loading
   const img = document.createElement('img');
-  img.src = imageSrc;
-  img.alt = card.name;
-  img.className = `w-full h-full object-contain transition-transform duration-500 ${isReversed ? 'reversed' : ''}`;
-  img.setAttribute('loading', 'eager');
 
+  // Set up error handler before setting src to avoid race conditions
   img.onerror = function() {
     this.onerror = null;
     this.src = createFallbackCardImage(card.name);
   };
+
+  // Add loading attributes for better performance
+  img.alt = card.name;
+  img.className = `w-full h-full object-contain transition-transform duration-500 ${isReversed ? 'reversed' : ''}`;
+  img.setAttribute('loading', 'lazy'); // Use lazy loading for better performance
+  img.setAttribute('decoding', 'async'); // Use async decoding to prevent blocking
+
+  // Add a low-quality placeholder while the image loads
+  img.style.backgroundColor = 'rgba(45, 20, 65, 0.3)';
+
+  // Set src last to start loading after all handlers are in place
+  img.src = imageSrc;
 
   // Create and append name label with Tailwind classes
   const nameLabel = document.createElement('div');
@@ -1121,6 +1237,36 @@ function createCardElements(card, isReversed, imageSrc, positionLabel) {
   cardEl.appendChild(cardFront);
 
   return { cardEl, cardFront, positionLabelEl, img, nameLabel };
+}
+
+/**
+ * Get random cards using an efficient Fisher-Yates shuffle algorithm
+ * @param {Array} deck - The deck of cards to select from
+ * @param {number} count - Number of cards to select
+ * @returns {Array} - Array of selected cards
+ */
+function getRandomCards(deck, count) {
+  // Create a copy of the deck to avoid modifying the original
+  const deckCopy = [...deck];
+  const result = [];
+  const n = deckCopy.length;
+
+  // Use Fisher-Yates shuffle algorithm (more efficient than sort with random)
+  // Only shuffle as many times as needed to get the required number of cards
+  const shuffleCount = Math.min(count, n);
+
+  for (let i = 0; i < shuffleCount; i++) {
+    // Get a random index from the remaining unshuffled portion
+    const j = i + Math.floor(Math.random() * (n - i));
+
+    // Swap elements at i and j
+    [deckCopy[i], deckCopy[j]] = [deckCopy[j], deckCopy[i]];
+
+    // Add the card to the result
+    result.push(deckCopy[i]);
+  }
+
+  return result;
 }
 
 /**

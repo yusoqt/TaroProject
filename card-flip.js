@@ -6,17 +6,14 @@
  */
 
 function createCardFlipSound() {
-  // Create a single AudioContext instance
   let audioContext;
 
   try {
-    // Handle browser compatibility for AudioContext
     let AudioContextClass = null;
 
     if (window.AudioContext) {
       AudioContextClass = window.AudioContext;
     } else if (window['webkitAudioContext']) {
-      // For older browsers that use the webkit prefix
       AudioContextClass = window['webkitAudioContext'];
     }
 
@@ -31,17 +28,14 @@ function createCardFlipSound() {
     return null;
   }
 
-  // Return the sound player function
   return function playCardFlip() {
     if (!audioContext) return null;
 
     try {
-      // Resume audio context if it was suspended (needed for some browsers)
       if (audioContext.state === 'suspended') {
         audioContext.resume();
       }
 
-      // Create and connect audio nodes
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
       const filterNode = audioContext.createBiquadFilter();
@@ -50,7 +44,6 @@ function createCardFlipSound() {
       filterNode.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
-      // Configure sound parameters
       oscillator.type = 'triangle';
       oscillator.frequency.setValueAtTime(220, audioContext.currentTime);
       oscillator.frequency.exponentialRampToValueAtTime(60, audioContext.currentTime + 0.2);
@@ -63,7 +56,6 @@ function createCardFlipSound() {
       gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.02);
       gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.2);
 
-      // Play the sound
       oscillator.start();
       oscillator.stop(audioContext.currentTime + 0.2);
 

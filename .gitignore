@@ -35,3 +35,19 @@ build/
 *.tmp
 *.temp
 .cache/
+
+# Python specific
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.env
+.venv
+.server_pid.txt
+*.egg-info/
+.installed.cfg
+*.egg
